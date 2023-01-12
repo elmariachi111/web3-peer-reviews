@@ -19,7 +19,7 @@ import { foundry, mainnet } from "wagmi/chains"
 import { alchemyProvider } from "wagmi/providers/alchemy"
 import { publicProvider } from "wagmi/providers/public"
 import { Header } from "../components/Header"
-import { theme } from "./theme"
+import { theme } from "../theme"
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 const { chains, provider } = configureChains(
