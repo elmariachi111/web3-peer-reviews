@@ -1,0 +1,11 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true,
+  },
+  "files.eol": "\n",
+  "editor.formatOnSave": false,
+  "solidity.formatter": "forge",
+  "[solidity]": {
+    "editor.formatOnSave": true,
+  },
+}

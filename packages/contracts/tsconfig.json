@@ -1,0 +1,16 @@
+{
+  "extends": "ts-config-app/base.json",
+  "compilerOptions": {
+    "target": "ES2015",
+    "module": "CommonJS",
+    "resolveJsonModule": true,
+    "outDir": "dist"
+  },
+  "include": [
+    "./index.ts",
+  ],
+  "exclude": [
+    "node_modules",
+    "typechain"
+  ],
+}

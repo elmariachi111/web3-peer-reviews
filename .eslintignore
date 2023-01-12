@@ -1,0 +1,7 @@
+!.*.json
+tsconfig.json
+.yarn/
+dist/
+.next/
+node_modules/
+coverage/

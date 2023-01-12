@@ -1,0 +1,17 @@
+```
+(0) 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266 (10000 ETH)
+(1) 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 (10000 ETH)
+(2) 0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc (10000 ETH)
+
+(0) 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+(1) 0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d
+(2) 0x5de4111afa1a4b94908f83103eb1f1706367c2e68ca870fc3fb9a804cdab365a
+
+forge script --rpc-url http://127.0.0.1:8545 script/Deploy.s.sol --broadcast --private-key 0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+
+0x5fbdb2315678afecb367f032d93f642f64180aa3
+
+cast send --rpc-url http://127.0.0.1:8545 0x5fbdb2315678afecb367f032d93f642f64180aa3 "safeMint(address)" 0x70997970c51812dc3a010c7d01b50e0d17dc79c8 --from 0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266
+cast send --rpc-url http://127.0.0.1:8545 0x5fbdb2315678afecb367f032d93f642f64180aa3 "ownerOf(uint256)" 1
+
+```

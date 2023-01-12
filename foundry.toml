@@ -1,0 +1,6 @@
+[fmt]
+line_length = 100
+tab_width = 2
+bracket_spacing = true
+
+# this is for vsc formatters. more config in the contracts package

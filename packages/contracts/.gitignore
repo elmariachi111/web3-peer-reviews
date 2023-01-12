@@ -1,0 +1,14 @@
+.env
+node_modules
+
+# Compiler files
+cache/
+out/
+dist/
+typechain/
+
+# Ignores development broadcast logs
+
+/broadcast/*
+lib/*
+!.gitkeep

@@ -1,0 +1,7 @@
+dist/
+coverage/
+node_modules/
+.next/
+*.json
+.yarnrc.yml
+.yarn/
