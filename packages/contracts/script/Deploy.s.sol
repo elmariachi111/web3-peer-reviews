@@ -8,7 +8,8 @@ contract DeployScript is Script {
   function setUp() public { }
 
   function run() public {
+    address orcidAddr = vm.envAddress("ORCID_ADDRESS");
     vm.broadcast();
-    new AntsReview();
+    new AntsReview(orcidAddr);
   }
 }
