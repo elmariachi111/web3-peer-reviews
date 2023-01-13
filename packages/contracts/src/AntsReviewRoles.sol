@@ -73,13 +73,22 @@ contract AntsReviewRoles is Ownable, AccessControl, Pausable {
     require(!isIssuer(account), "Account is already an issuer");
     // uninitialized mapping had zero value by default since ORCID is a string check whether its length is 0
     require(bytes(orcid.addressToOrcid(account)).length != 0, "Address not connected to ORCID");
-    //grantRole(ISSUER_ROLE, account);
     _grantRole(ISSUER_ROLE, account);
     return true;
   }
 
   /// @notice Add a new Peer-Reviewer
   /// @dev Access unrestricted, anyone can become a peer reviewer, in fact we don't want the issuer to see the identity of the reviewer
+  /// @param account Address of the new Peer-Reviewer
+  /// @return True if the account address is added as Peer-Reviewer
+  function addPeerReviewer(address account) external returns (bool) {
+    require(!isPeerReviewer(account), "Account is already a peer-reviewer");
+    grantRole(PEER_REVIEWER_ROLE, account);
+    return true;
+  }
+
+  /// @notice Add a new Peer-Reviewer
+  /// @dev Access, anyone can become a peer reviewer, in fact we don't want the issuer to see the identity of the reviewer
   /// @param account Address of the new Peer-Reviewer
   /// @return True if the account address is added as Peer-Reviewer
   function addPeerReviewer(address account) external returns (bool) {
