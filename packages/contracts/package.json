@@ -13,6 +13,7 @@
     "typechain": "typechain --target ethers-v5  --discriminate-types --ts-nocheck --out-dir typechain out/**/*.json"
   },
   "dependencies": {
+    "@openzeppelin/contracts": "^4.8.0",
     "ethers": "^5.7.0"
   },
   "devDependencies": {
@@ -20,5 +21,4 @@
     "ts-config-app": "*",
     "typechain": "^8.1.1"
   }
-
 }
