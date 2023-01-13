@@ -13,14 +13,15 @@ import { Provider, WebSocketProvider } from "@wagmi/core"
 import type { AppProps } from "next/app"
 import { Client, configureChains, createClient, WagmiConfig } from "wagmi"
 
-import { Inter } from "@next/font/google"
+//import { Inter } from "@next/font/google"
 import { useEffect, useState } from "react"
 import { foundry, mainnet } from "wagmi/chains"
 import { alchemyProvider } from "wagmi/providers/alchemy"
 import { publicProvider } from "wagmi/providers/public"
 import { Header } from "../components/Header"
 import { theme } from "../theme"
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+import { SessionProvider } from "next-auth/react"
+//const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
 
 const { chains, provider } = configureChains(
   [mainnet, foundry],
@@ -59,16 +60,18 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <ChakraProvider theme={theme}>
-      {client && (
-        <WagmiConfig client={client}>
-          <RainbowKitProvider chains={chains}>
-            <Container maxW="container.lg" my={1} className={inter.className}>
-              <Header />
-              <Component {...pageProps} />
-            </Container>
-          </RainbowKitProvider>
-        </WagmiConfig>
-      )}
+      <SessionProvider session={pageProps.session}>
+        {client && (
+          <WagmiConfig client={client}>
+            <RainbowKitProvider chains={chains}>
+              <Container maxW="container.lg" my={1}>
+                <Header />
+                <Component {...pageProps} />
+              </Container>
+            </RainbowKitProvider>
+          </WagmiConfig>
+        )}
+      </SessionProvider>
     </ChakraProvider>
   )
 }
