@@ -2,13 +2,13 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Script.sol";
-import { AntsReviewRoles } from "../src/AntsReviewRoles.sol";
+import { AntsReview } from "../src/AntsReview.sol";
 
 contract DeployScript is Script {
   function setUp() public { }
 
   function run() public {
     vm.broadcast();
-    new AntsReviewRoles();
+    new AntsReview();
   }
 }

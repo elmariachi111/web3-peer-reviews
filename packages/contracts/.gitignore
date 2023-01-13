@@ -9,11 +9,10 @@ dist/
 # checks in some typechain definitions so we can compile frontend code on vercel without building contracts there.
 typechain/*
 !typechain/common.ts
-!typechain/Token.ts
+!typechain/AntsReview.ts
 !typechain/factories
 typechain/factories/*
-!typechain/factories/Token__factory.ts
-
+!typechain/factories/AntsReview__factory.ts
 
 # Ignores development broadcast logs
 

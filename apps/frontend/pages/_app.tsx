@@ -15,7 +15,7 @@ import { Client, configureChains, createClient, WagmiConfig } from "wagmi"
 
 //import { Inter } from "@next/font/google"
 import { useEffect, useState } from "react"
-import { foundry, mainnet } from "wagmi/chains"
+import { foundry, polygonMumbai } from "wagmi/chains"
 import { alchemyProvider } from "wagmi/providers/alchemy"
 import { publicProvider } from "wagmi/providers/public"
 import { Header } from "../components/Header"
@@ -26,7 +26,7 @@ import "@rainbow-me/rainbowkit/styles.css"
 import "react-datepicker/dist/react-datepicker.css"
 
 const { chains, provider } = configureChains(
-  [mainnet, foundry],
+  [polygonMumbai, foundry],
   [
     alchemyProvider({
       apiKey: process.env.NEXT_PUBLIC_ALCHEMY_KEY as string,

@@ -1,26 +1,30 @@
 import { Flex, Text } from "@chakra-ui/react"
 import { useSession } from "next-auth/react"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
+import { useAccount } from "wagmi"
 import { ReviewForm } from "../components/review/ReviewForm"
 import { useTokenContract } from "../hooks/useTokenContract"
 
 export default function Home() {
-  const { contract: token } = useTokenContract()
-  const [contractName, setContractName] = useState<string>()
+  const { contract: reviewContract } = useTokenContract()
+  //const [reviewContract, setReviewContract] = useState<>()
+  const { address } = useAccount()
 
-  const { data, status } = useSession()
+  const { data } = useSession()
   useEffect(() => {
-    if (!token) return
+    if (!reviewContract || !address) return
+    console.log(reviewContract.address)
     ;(async () => {
-      setContractName(await token.name())
+      const result = await reviewContract.isIssuer(address)
+      console.log("ISISSUERRE", result)
     })()
-  }, [token])
+  }, [address, reviewContract])
 
   console.log(data)
 
   return (
     <Flex direction="column">
-      <Text>{contractName}</Text>
+      <Text>foo</Text>
       <ReviewForm />
     </Flex>
   )
