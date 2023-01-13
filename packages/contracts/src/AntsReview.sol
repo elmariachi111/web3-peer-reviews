@@ -1,5 +1,5 @@
 /// SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.8.13;
 pragma experimental ABIEncoderV2;
 
 /// @title Ants-Review
@@ -20,10 +20,11 @@ pragma experimental ABIEncoderV2;
 
 
 import "./AntsReviewRoles.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
-import "@openzeppelin/contracts/utils/EnumerableSet.sol";
+import "@openzeppelin/contracts/utils/structs/EnumerableSet.sol";
+
 
 
 contract AntsReview is AntsReviewRoles {
@@ -114,12 +115,12 @@ contract AntsReview is AntsReviewRoles {
   }
 
   modifier validateDeadline(uint256 _deadline) {
-      require(_deadline > now);
+      require(_deadline > block.timestamp);
       _;
   }
 
   modifier isBeforeDeadline(uint256 _antId) {
-    require(now < antreviews[_antId].deadline);
+    require(block.timestamp < antreviews[_antId].deadline);
     _;
   }
 
@@ -262,7 +263,7 @@ contract AntsReview is AntsReviewRoles {
       returns (bool)
   {
     require(!approvers[_antId].contains(_account), "Account is already an approver");
-    require(bytes(addressToOrcid[account]).length!=0, "Address not connected to ORCID");
+    require(bytes(orcid.addressToOrcid(_account)).length!=0, "Address not connected to ORCID");
     require(approvers[_antId].add(_account));
     emit ApproverAdded(_antId, _issuerId, _account);
     return true;
@@ -300,7 +301,7 @@ contract AntsReview is AntsReviewRoles {
     whenNotPaused()
     returns (bool)
   {
-    contributions[_antId].push(Contribution(msg.sender, _amount, false));
+    contributions[_antId].push(Contribution(payable(msg.sender), _amount, false));
     antreviews[_antId].balance = antreviews[_antId].balance.add(_amount);
 
     require(msg.value>=_amount);
@@ -324,7 +325,7 @@ contract AntsReview is AntsReviewRoles {
     whenNotPaused()
     returns (bool)
   {
-    require(now > antreviews[_antId].deadline, "Deadline has not elapsed");
+    require(block.timestamp > antreviews[_antId].deadline, "Deadline has not elapsed");
 
     Contribution storage contribution = contributions[_antId][_contributionId];
 
@@ -353,7 +354,7 @@ contract AntsReview is AntsReviewRoles {
     whenNotPaused()
     returns (bool)
   {
-    peer_reviews[_antId].push(Peer_Review(false, msg.sender, _reviewHash));
+    peer_reviews[_antId].push(Peer_Review(false, payable(msg.sender), _reviewHash));
 
     emit AntReviewFulfilled(_antId, peer_reviews[_antId].length.sub(1), msg.sender, _reviewHash);
     return true;
@@ -417,7 +418,7 @@ contract AntsReview is AntsReviewRoles {
       whenNotPaused()
       returns (bool)
   {
-    require(now > antreviews[_antId].deadline, "Deadline has not elapsed");
+    require(block.timestamp > antreviews[_antId].deadline, "Deadline has not elapsed");
     require(antreviews[_antId].balance >= _amount, "Amount exceed AntReview balance");
 
     antreviews[_antId].balance = antreviews[_antId].balance.sub(_amount);

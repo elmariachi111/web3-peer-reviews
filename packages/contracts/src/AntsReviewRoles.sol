@@ -1,5 +1,5 @@
 /// SPDX-License-Identifier: GPL-3.0
-pragma solidity 0.6.12;
+pragma solidity 0.8.13;
 
 ///@title Ants-Review
 ///@author Nazzareno Massari @naszam
@@ -9,13 +9,12 @@ pragma solidity 0.6.12;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
-import "@openzeppelin/contracts/utils/Pausable.sol";
-import "./Orcid.sol";
+import "@openzeppelin/contracts/security/Pausable.sol";
 
 
 
-interface Orcid{
-  function addressToOrcid(string _address) public;
+interface Orcid {
+  function addressToOrcid(address _address) external returns(string memory);
 }
 
 contract AntsReviewRoles is Ownable, AccessControl, Pausable {
@@ -31,7 +30,7 @@ contract AntsReviewRoles is Ownable, AccessControl, Pausable {
   constructor() public {
           _setupRole(DEFAULT_ADMIN_ROLE, owner());
           _setupRole(PAUSER_ROLE, owner());
-          orcid = Orcid(add);
+          orcid = Orcid(ORCID_CONTRACT_ADD);
   }
 
     /// @dev Modifiers

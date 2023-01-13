@@ -9,6 +9,6 @@ contract DeployScript is Script {
 
   function run() public {
     vm.broadcast();
-    new Token();
+    new AntsReviewRoles();
   }
 }
