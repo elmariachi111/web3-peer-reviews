@@ -6,7 +6,7 @@ import { ReviewForm } from "../components/review/ReviewForm"
 import { useTokenContract } from "../hooks/useTokenContract"
 
 export default function Home() {
-  const { contract: reviewContract } = useTokenContract()
+  const { contract: reviewContract, orchidContract } = useTokenContract()
   //const [reviewContract, setReviewContract] = useState<>()
   const { address } = useAccount()
 
@@ -20,7 +20,13 @@ export default function Home() {
     })()
   }, [address, reviewContract])
 
-  console.log(data)
+  useEffect(() => {
+    if (!orchidContract || !address) return
+    ;(async () => {
+      const result = await orchidContract.addressToOrcid(address)
+      console.log("orchid address map", result)
+    })()
+  }, [address, orchidContract])
 
   return (
     <Flex direction="column">
