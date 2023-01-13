@@ -22,6 +22,8 @@ import { Header } from "../components/Header"
 import { theme } from "../theme"
 import { SessionProvider } from "next-auth/react"
 //const inter = Inter({ subsets: ["latin"], variable: "--font-inter" })
+import "@rainbow-me/rainbowkit/styles.css"
+import "react-datepicker/dist/react-datepicker.css"
 
 const { chains, provider } = configureChains(
   [mainnet, foundry],

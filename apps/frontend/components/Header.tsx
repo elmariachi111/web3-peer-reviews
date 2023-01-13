@@ -1,6 +1,5 @@
 import { Button, ButtonGroup, Flex, Text } from "@chakra-ui/react"
 import React from "react"
-import "@rainbow-me/rainbowkit/styles.css"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { signIn, signOut, useSession } from "next-auth/react"
 

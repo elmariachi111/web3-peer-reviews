@@ -2,10 +2,10 @@ import { Flex, Text } from "@chakra-ui/react"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
 import { useAccount } from "wagmi"
+import { ReviewForm } from "../components/review/ReviewForm"
 import { useTokenContract } from "../hooks/useTokenContract"
 
 export default function Home() {
-  const { address } = useAccount()
   const { contract: token } = useTokenContract()
   const [contractName, setContractName] = useState<string>()
 
@@ -21,9 +21,8 @@ export default function Home() {
 
   return (
     <Flex direction="column">
-      <Text>{address}</Text>
       <Text>{contractName}</Text>
-      <Text>{data?.user?.username}</Text>
+      <ReviewForm />
     </Flex>
   )
 }
