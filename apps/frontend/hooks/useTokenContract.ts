@@ -7,9 +7,9 @@ import { useAccount, useNetwork, useSigner } from "wagmi"
 //mumbai orcid contract: 0x74a58601b3765516196EBF7db47A1959eD886097
 
 const config: Record<string, { ocrid: string; antreview: string }> = {
-  polygonMumbai: {
+  maticmum: {
     ocrid: "0x74a58601b3765516196EBF7db47A1959eD886097",
-    antreview: "0x",
+    antreview: "0xe0D404C22228b03D5b8a715Cb569C4944BC5A27A",
   },
   foundry: {
     ocrid: "0x",

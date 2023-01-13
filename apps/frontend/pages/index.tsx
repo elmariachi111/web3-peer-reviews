@@ -16,7 +16,7 @@ export default function Home() {
     console.log(reviewContract.address)
     ;(async () => {
       const result = await reviewContract.isIssuer(address)
-      console.log("ISISSUERRE", result)
+      console.log("isIssuer", result)
     })()
   }, [address, reviewContract])
 
