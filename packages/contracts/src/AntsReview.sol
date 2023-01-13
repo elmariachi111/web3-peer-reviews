@@ -20,7 +20,6 @@ pragma experimental ABIEncoderV2;
 
 
 import "./AntsReviewRoles.sol";
-import "./Orcid.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts/utils/Address.sol";
 import "@openzeppelin/contracts/utils/Counters.sol";
