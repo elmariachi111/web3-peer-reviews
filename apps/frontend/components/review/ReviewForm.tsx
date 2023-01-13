@@ -9,11 +9,10 @@ import {
 import { ChangeEvent, useCallback, useEffect, useRef } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useAccount } from "wagmi"
-//import ReactDatePicker from "react-datepicker"
 import { SingleDatepicker } from "chakra-dayzed-datepicker"
 import { Web3Storage } from "web3.storage"
 
-export const ReviewForm = () => {
+export const ReviewForm = (props: { onSubmit: (data: any) => void }) => {
   const { address } = useAccount()
 
   const uploadFile = useCallback(async (file: File) => {
@@ -31,15 +30,17 @@ export const ReviewForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isValid },
     setValue,
     control,
   } = useForm({
     defaultValues: {
       issuer: address,
+      approver: "",
       paperCid: "",
       deadline: new Date(),
     },
+    mode: "all",
   })
 
   useEffect(() => {
@@ -47,7 +48,7 @@ export const ReviewForm = () => {
   }, [address, setValue])
 
   const onSubmit = (data: any) => {
-    console.log(data)
+    props.onSubmit(data)
   }
 
   return (
@@ -61,13 +62,22 @@ export const ReviewForm = () => {
       >
         <FormControl>
           <FormLabel>Author (Issuer)</FormLabel>
-          <Input {...register("issuer")} disabled />
+          <Input
+            {...register("issuer", {
+              required: true,
+              minLength: 40,
+            })}
+            disabled
+          />
         </FormControl>
 
         <Flex gap={2}>
           <FormControl>
             <FormLabel htmlFor="paperCid">Paper CID</FormLabel>
-            <Input {...register("paperCid")} defaultValue="Qm" />
+            <Input
+              {...register("paperCid", { required: true })}
+              defaultValue="Qm"
+            />
           </FormControl>
 
           <Flex onClick={() => inputRef.current?.click()} alignItems="flex-end">
@@ -90,6 +100,9 @@ export const ReviewForm = () => {
           <FormLabel>Deadline</FormLabel>
           <Controller
             name="deadline"
+            rules={{
+              required: true,
+            }}
             control={control}
             render={({ field }) => (
               <SingleDatepicker
@@ -100,7 +113,19 @@ export const ReviewForm = () => {
             )}
           />
         </FormControl>
-        <Button type="submit">Submit</Button>
+        <FormControl>
+          <FormLabel>Approver</FormLabel>
+          <Input
+            {...register("approver", {
+              required: true,
+              minLength: 40,
+            })}
+          />
+        </FormControl>
+
+        <Button type="submit" disabled={!isValid}>
+          Submit
+        </Button>
       </Flex>
     </>
   )

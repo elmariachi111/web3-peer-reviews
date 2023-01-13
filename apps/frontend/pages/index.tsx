@@ -1,4 +1,4 @@
-import { Button, Flex, Link, Text } from "@chakra-ui/react"
+import { Button, Flex, Link, Text, useToast } from "@chakra-ui/react"
 import { useSession } from "next-auth/react"
 import { useCallback, useEffect, useState } from "react"
 import { useAccount } from "wagmi"
@@ -14,6 +14,7 @@ export default function Home() {
 
   const { data } = useSession()
 
+  const toast = useToast()
   useEffect(() => {
     if (!reviewContract || !address) return
     ;(async () => {
@@ -38,6 +39,29 @@ export default function Home() {
     })()
   }, [address, orchidContract])
 
+  const submitReviewRequest = useCallback(
+    async (data: {
+      issuer: string
+      approver: string
+      paperCid: string
+      deadline: Date
+    }) => {
+      const result = await reviewContract?.issueAntReview(
+        [data.issuer],
+        data.approver,
+        data.paperCid,
+        "",
+        Math.floor(data.deadline.getTime())
+      )
+      console.log(result)
+      toast({
+        title: "created review request",
+        description: "now wait for peer reviewers to show up",
+      })
+    },
+    [reviewContract, toast]
+  )
+
   return (
     <Flex direction="column">
       {hasIssuerRole ? (
@@ -49,7 +73,7 @@ export default function Home() {
           Map your orcid to your address first
         </Link>
       )}
-      <ReviewForm />
+      <ReviewForm onSubmit={submitReviewRequest} />
     </Flex>
   )
 }
