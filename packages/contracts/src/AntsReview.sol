@@ -9,12 +9,12 @@ pragma experimental ABIEncoderV2;
 /// @dev OpenZeppelin library is used for secure contract development
 
 /**
- * █████  ███    ██ ████████ ███████       ██████  ███████ ██    ██ ██ ███████ ██     ██ 
- * ██   ██ ████   ██    ██    ██            ██   ██ ██      ██    ██ ██ ██      ██     ██ 
- * ███████ ██ ██  ██    ██    ███████ █████ ██████  █████   ██    ██ ██ █████   ██  █  ██ 
- * ██   ██ ██  ██ ██    ██         ██       ██   ██ ██       ██  ██  ██ ██      ██ ███ ██ 
- * ██   ██ ██   ████    ██    ███████       ██   ██ ███████   ████   ██ ███████  ███ ███  
- * 
+ * █████  ███    ██ ████████ ███████       ██████  ███████ ██    ██ ██ ███████ ██     ██
+ * ██   ██ ████   ██    ██    ██            ██   ██ ██      ██    ██ ██ ██      ██     ██
+ * ███████ ██ ██  ██    ██    ███████ █████ ██████  █████   ██    ██ ██ █████   ██  █  ██
+ * ██   ██ ██  ██ ██    ██         ██       ██   ██ ██       ██  ██  ██ ██      ██ ███ ██
+ * ██   ██ ██   ████    ██    ███████       ██   ██ ███████   ████   ██ ███████  ███ ███
+ *
  *
  */
 
@@ -189,7 +189,7 @@ contract AntsReview is AntsReviewRoles {
   }
 
   /// @notice Create a new AntReview
-  /// @dev Access restricted to Issuer
+  /// @dev anyone can call this function as long as the have a linked ORCID ID
   /// @param _issuers The issuers of the AntReview
   /// @param _approver The approver of the AntReview
   /// @param _paperHash The IPFS Hash of the Scientific Paper
@@ -202,7 +202,7 @@ contract AntsReview is AntsReviewRoles {
     string calldata _paperHash,
     string calldata _topicsHash,
     uint64 _deadline
-  ) external onlyIssuer validateDeadline(_deadline) whenNotPaused returns (bool) {
+  ) external validateDeadline(_deadline) whenNotPaused returns (bool) {
     uint256 antId = antReviewIdTracker.current();
 
     AntReview storage newAntReview = antreviews[antId];
@@ -213,6 +213,7 @@ contract AntsReview is AntsReviewRoles {
     newAntReview.deadline = _deadline;
     newAntReview.status = AntReviewStatus.CREATED;
 
+    require(bytes(orcid.addressToOrcid(_issuers)) != 0, "This account has not been linked to ORCID");
     require(_addApprover(antId, _approver));
 
     antReviewIdTracker.increment();
@@ -258,7 +259,7 @@ contract AntsReview is AntsReviewRoles {
   }
 
   /// @notice Add Approver
-  /// @dev Access restricted to Issuers and must have linked ORCID ID
+  /// @dev Access restricted to Issuers and Accessor must have linked ORCID ID
   /// @param _antId The AntReview Id
   /// @param _issuerId The Issuer Id
   /// @param _account The account to be added as Approver
@@ -297,7 +298,6 @@ contract AntsReview is AntsReviewRoles {
   }
 
   /// @notice Contribute to an AntReview
-  /// @dev Linked to ANTS token
   /// @param _antId The AntReview Id
   /// @param _amount The Contribution amount
   /// @return True if the account is the contribution is successfully added
@@ -348,13 +348,12 @@ contract AntsReview is AntsReviewRoles {
   }
 
   /// @notice Submit a fulfillment for the given antReview
-  /// @dev Access restricted to Peer-Reviewer
+  /// @dev Access unrestricted
   /// @param _antId The AntReview Id
   /// @param _reviewHash The IPFS Hash of the peer-review
   /// @return True If the AntReview is successfully fulfilled
   function fulfillAntReview(uint256 _antId, string calldata _reviewHash)
     external
-    onlyPeerReviewer
     antReviewExists(_antId)
     hasStatus(_antId, AntReviewStatus.CREATED)
     isBeforeDeadline(_antId)
@@ -389,7 +388,7 @@ contract AntsReview is AntsReviewRoles {
   }
 
   /// @notice Accept a given Peer-Review
-  /// @dev Access restricted to Issuer
+  /// @dev Access restricted to Approver
   /// @param _antId The AntReview Id
   /// @param _reviewId The Peer_Review Id
   /// @return True If the AntReview is successfully being accepted
