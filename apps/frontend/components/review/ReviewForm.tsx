@@ -46,7 +46,7 @@ export const ReviewForm = () => {
     setValue("issuer", address)
   }, [address, setValue])
 
-  const onSubmit = (data) => {
+  const onSubmit = (data: any) => {
     console.log(data)
   }
 

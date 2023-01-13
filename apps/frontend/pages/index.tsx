@@ -1,7 +1,6 @@
 import { Flex, Text } from "@chakra-ui/react"
 import { useSession } from "next-auth/react"
 import { useEffect, useState } from "react"
-import { useAccount } from "wagmi"
 import { ReviewForm } from "../components/review/ReviewForm"
 import { useTokenContract } from "../hooks/useTokenContract"
 
