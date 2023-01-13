@@ -21,7 +21,6 @@ export default function Home() {
 
   return (
     <Flex direction="column">
-      <Text>hmm</Text>
       <Text>{address}</Text>
       <Text>{contractName}</Text>
       <Text>{data?.user?.username}</Text>

@@ -32,7 +32,12 @@ export const authOptions: AuthOptions = {
         console.log("NO USER IN SESSION")
         return session
       }
+      //session.user.id = token.sub
+
       session.user.username = token.username
+      session.user.orc_access = token.orc_access
+      session.user.orcid = token.orcid
+
       return session
     },
     async jwt({ token, user, account, profile, isNewUser }) {
@@ -42,6 +47,8 @@ export const authOptions: AuthOptions = {
       }
       if (account?.name) {
         token.username = account.name as string
+        token.orcid = account.orcid as string
+        token.orc_access = account.access_token
       }
 
       return token

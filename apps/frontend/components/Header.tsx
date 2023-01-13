@@ -1,10 +1,12 @@
-import { Button, Flex, Text } from "@chakra-ui/react"
+import { Button, ButtonGroup, Flex, Text } from "@chakra-ui/react"
 import React from "react"
 import "@rainbow-me/rainbowkit/styles.css"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { signIn } from "next-auth/react"
+import { signIn, signOut, useSession } from "next-auth/react"
 
 export const Header = () => {
+  const { data: session, status } = useSession()
+  console.log(session)
   return (
     <Flex
       w="full"
@@ -16,8 +18,22 @@ export const Header = () => {
       borderBottomColor="gray.200"
     >
       <Text>@app</Text>
-      <ConnectButton />
-      <Button onClick={() => signIn()}>sign in</Button>
+      <ButtonGroup isAttached gap={2}>
+        <ConnectButton />
+
+        {status == "authenticated" ? (
+          <Flex direction="column">
+            <Text fontWeight="bold" fontSize="sm" title={session.user?.orcid}>
+              {session?.user?.username}
+            </Text>
+            <Button onClick={() => signOut()} size="xs">
+              sign out
+            </Button>
+          </Flex>
+        ) : (
+          <Button onClick={() => signIn()}>sign in with Ocrid</Button>
+        )}
+      </ButtonGroup>
     </Flex>
   )
 }

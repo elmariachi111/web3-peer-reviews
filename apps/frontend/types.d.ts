@@ -6,14 +6,17 @@ declare module "next-auth" {
       // eth?: string;
       // roles?: string[];
       username?: string
+      orcid?: string
+      orc_access?: string
     }
   }
 }
 
 declare module "next-auth/jwt/types" {
   interface JWT {
-    uid?: string
+    orcid?: string
     username?: string
+    orc_access?: string
     // eth?: string;
     //    roles?: string[];
   }
