@@ -2,7 +2,7 @@ import NextAuth from "next-auth"
 import type { OAuthConfig } from "next-auth/providers"
 import type { AuthOptions } from "next-auth"
 
-const OcridAuthProvider: OAuthConfig<{ name: string }> = {
+const OrcidAuthProvider: OAuthConfig<{ name: string }> = {
   id: "orcid",
   name: "ORCId",
   type: "oauth",
@@ -23,7 +23,7 @@ const OcridAuthProvider: OAuthConfig<{ name: string }> = {
 
 export const authOptions: AuthOptions = {
   // Configure one or more authentication providers
-  providers: [OcridAuthProvider],
+  providers: [OrcidAuthProvider],
   debug: true,
   callbacks: {
     async session({ session, token, user }) {
