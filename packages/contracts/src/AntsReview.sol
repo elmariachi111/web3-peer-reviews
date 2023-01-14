@@ -77,7 +77,7 @@ contract AntsReview is AntsReviewRoles {
     uint256 antId, uint256 contributionId, address contributor, uint256 amount
   );
   event ContributionRefunded(uint256 antId, uint256 contributionId, address contributor);
-  event AntReviewFulfilled(
+  event PeerReviewSubmitted(
     uint256 antId, uint256 reviewId, address peer_reviewer, string reviewHash
   );
   event ReviewUpdated(uint256 antId, uint256 reviewId, string reviewHash);
@@ -204,7 +204,8 @@ contract AntsReview is AntsReviewRoles {
     newAntReview.deadline = _deadline;
     newAntReview.status = AntReviewStatus.CREATED;
 
-    //require(bytes(orcid.addressToOrcid(_issuers)).length != 0, "Your account must be linked to an ORCID to issue a peer review request");
+    //dont't require issuers to have linked ORCID ID for simplicity in demoing here
+    //require(bytes(orcid.addressToOrcid(_approver)).length != 0, "Your account must be linked to an ORCID to approve a peer review request");
     require(_addApprover(antId, _approver));
 
     antReviewIdTracker.increment();
@@ -338,7 +339,7 @@ contract AntsReview is AntsReviewRoles {
   }
 
   /// @notice Submits a peer review for the given antReview
-  /// @dev submitters must either have a linked orcid account (their identity is known), or they must provide a proof hash that approvers can check
+  /// @dev submitters must either have a linked orcid account (their identity is known), or they must provide a proof hash that approvers can check their identity
   /// @dev privacy preferring reviewers disclose cleartext messages & sigs to approvers.
   /// @dev Approvers can verify the sigs, hash them and compare the hash with the provided _orcidProof
   /// @param _antId The AntReview Id
@@ -361,7 +362,7 @@ contract AntsReview is AntsReviewRoles {
     peer_reviews[_antId].push(Peer_Review(false, payable(msg.sender), _reviewHash, _orcidProof));
 
     //todo this should be called "PeerReviewSubmitted"
-    emit AntReviewFulfilled(_antId, peer_reviews[_antId].length.sub(1), msg.sender, _reviewHash);
+    emit PeerReviewSubmitted(_antId, peer_reviews[_antId].length.sub(1), msg.sender, _reviewHash);
     return true;
   }
 
@@ -416,6 +417,7 @@ contract AntsReview is AntsReviewRoles {
   ///todo: well. After the deadline has passed, ANY issuer (coauthor)
   ///todo: may withdraw ANY amount from the contribution funds
   ///todo: that means that we just have to wait until the deadline passes and can get all the contributor's money without having any peer review to pass :D
+  //solution: after deadline ellapses the initial issuer contribution should be returned to the issuer and the contributor contributions should be returned to the contributors
   /// @notice Withdraw AntReview
   /// @dev Access restricted to Issuer
   /// @param _antId The AntReview Id

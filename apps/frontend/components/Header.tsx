@@ -1,12 +1,21 @@
-import { Button, ButtonGroup, Flex, Text } from "@chakra-ui/react"
-import React from "react"
+import { Button, ButtonGroup, Link, Flex } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { signIn, signOut, useSession } from "next-auth/react"
-import Link from "next/link"
+import { useAccount } from "wagmi"
+import { useTokenContract } from "../hooks/useTokenContract"
 
 export const Header = () => {
-  const { data: session, status } = useSession()
-  console.log(session)
+  const { address } = useAccount()
+  const [mappedOrcid, setMappedOrcid] = useState<string>()
+  const { contract: reviewContract, orchidContract } = useTokenContract()
+
+  useEffect(() => {
+    if (!orchidContract || !address) return
+    ;(async () => {
+      setMappedOrcid(await orchidContract.addressToOrcid(address))
+    })()
+  }, [address, orchidContract])
+
   return (
     <Flex
       w="full"
@@ -17,21 +26,26 @@ export const Header = () => {
       borderBottomWidth="1px"
       borderBottomColor="gray.200"
     >
-      <Link href="/">@app</Link>
+      <Link href="/">P33R Review</Link>
       <ButtonGroup isAttached gap={2}>
         <ConnectButton />
 
-        {status == "authenticated" ? (
+        {mappedOrcid ? (
           <Flex direction="column">
-            <Text fontWeight="bold" fontSize="sm" title={session.user?.orcid}>
-              {session?.user?.username}
-            </Text>
-            <Button onClick={() => signOut()} size="xs">
-              sign out
-            </Button>
+            <div className="hover:underline">
+              <Link href={`https://orcid.org/${mappedOrcid}`} target="_blank">
+                {mappedOrcid}
+              </Link>
+            </div>
           </Flex>
         ) : (
-          <Button onClick={() => signIn()}>sign in with Orcid</Button>
+          <Link
+            as={Button}
+            href={"https://orcidauth.vercel.app/register"}
+            isExternal
+          >
+            Register with ORCID
+          </Link>
         )}
       </ButtonGroup>
     </Flex>
