@@ -31,7 +31,7 @@ export const Header = () => {
             </Button>
           </Flex>
         ) : (
-          <Button onClick={() => signIn()}>sign in with ORCID</Button>
+          <Button onClick={() => signIn()}>sign in with Orcid</Button>
         )}
       </ButtonGroup>
     </Flex>

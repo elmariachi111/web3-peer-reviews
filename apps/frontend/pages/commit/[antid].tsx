@@ -36,7 +36,7 @@ export default function Commit() {
 
   return (
     <Flex direction="column">
-      <Heading mb={2}>Apply as a peer reviewer for {antid}</Heading>
+      <Heading mb={2}>Apply to peer review {antid}</Heading>
       <Flex my={4} w="100%" direction="column">
         <Heading size="md" mb={2}>
           Create Commitment
