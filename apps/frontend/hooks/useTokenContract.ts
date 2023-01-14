@@ -10,7 +10,7 @@ import { Contract, ethers } from "ethers"
 const config: Record<string, { ocrid: string; antreview: string }> = {
   maticmum: {
     ocrid: "0x74a58601b3765516196EBF7db47A1959eD886097",
-    antreview: "0xe0D404C22228b03D5b8a715Cb569C4944BC5A27A",
+    antreview: "0x36d304993cb1575a2f9b8a0388b18aa5ec6d7a61",
   },
   foundry: {
     ocrid: "0x5FbDB2315678afecb367f032d93F642f64180aa3",
