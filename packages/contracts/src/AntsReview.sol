@@ -59,6 +59,7 @@ contract AntsReview is AntsReviewRoles {
     bool accepted;
     address payable peer_reviewer;
     string reviewHash;
+    bytes32 orcidProof;
   }
 
   struct Contribution {
@@ -337,11 +338,14 @@ contract AntsReview is AntsReviewRoles {
   }
 
   /// @notice Submits a peer review for the given antReview
-  /// @dev Access unrestricted
+  /// @dev submitters must either have a linked orcid account (their identity is known), or they must provide a proof hash that approvers can check
+  /// @dev privacy preferring reviewers disclose cleartext messages & sigs to approvers.
+  /// @dev Approvers can verify the sigs, hash them and compare the hash with the provided _orcidProof
   /// @param _antId The AntReview Id
   /// @param _reviewHash The IPFS Hash of the peer-review
+  /// @param _orcidProof optional: keccak( sig(anon -> private) + sig(private -> anon) )
   /// @return True If the AntReview is successfully fulfilled
-  function submitPeerReview(uint256 _antId, string calldata _reviewHash)
+  function submitPeerReview(uint256 _antId, string calldata _reviewHash, bytes32 _orcidProof)
     external
     antReviewExists(_antId)
     hasStatus(_antId, AntReviewStatus.CREATED)
@@ -349,8 +353,14 @@ contract AntsReview is AntsReviewRoles {
     whenNotPaused
     returns (bool)
   {
-    peer_reviews[_antId].push(Peer_Review(false, payable(msg.sender), _reviewHash));
+    if (uint256(_orcidProof) == 0) {
+      //no proof provided, lets check if the sender has a linked their profile
+      require(bytes(orcid.addressToOrcid(msg.sender)).length != 0, "account not linked with ORCID");
+    }
 
+    peer_reviews[_antId].push(Peer_Review(false, payable(msg.sender), _reviewHash, _orcidProof));
+
+    //todo this should be called "PeerReviewSubmitted"
     emit AntReviewFulfilled(_antId, peer_reviews[_antId].length.sub(1), msg.sender, _reviewHash);
     return true;
   }
