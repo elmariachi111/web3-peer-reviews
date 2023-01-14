@@ -1,37 +1,26 @@
 import { Button, Flex, Heading } from "@chakra-ui/react"
+import { ethers } from "ethers"
 import { useRouter } from "next/router"
 import { useCallback, useState } from "react"
-import { useSignMessage } from "wagmi"
 import { CommitmentForm } from "../../components/commitment/CommitmentForm"
+import { SignedCommitment } from "../../types"
 
-export default function Commit() {
+export default function Review() {
   const { query } = useRouter()
   const { antid } = query
 
-  const { signMessageAsync } = useSignMessage()
-  const [signedCommitment, setSignedCommitment] = useState<{
-    message: string
-    signedMessage: string
-  }>()
-
-  const createReviewCommitment = async (data: {
-    privateAddress: string
-    anonAddress: string
-  }) => {
-    const nonce = Math.floor(Math.random() * 1_000_000)
-
-    const _message = `undisclosed:${data.privateAddress}\n\npublic:${data.anonAddress}\n\nnonce:${nonce}`
-    const _signedMessage = await signMessageAsync({
-      message: _message,
-    })
-    setSignedCommitment({
-      message: _message,
-      signedMessage: _signedMessage,
-    })
-  }
+  const [signedCommitment, setSignedCommitment] = useState<SignedCommitment>()
 
   const anchorCommitment = useCallback(async () => {
-    console.log(signedCommitment)
+    if (!signedCommitment) return
+    const conc = ethers.utils.hexConcat([
+      signedCommitment.privateAddress,
+      signedCommitment.signedPrivateAddress,
+      signedCommitment.anonAddress,
+      signedCommitment.signedAnonAddress,
+    ])
+    const hash = ethers.utils.keccak256(conc)
+    console.log("commitment hash", signedCommitment, conc, hash)
   }, [signedCommitment])
 
   return (
@@ -44,14 +33,14 @@ export default function Commit() {
         {signedCommitment ? (
           <Flex direction="row" w="full" gap={2}>
             <Button onClick={() => anchorCommitment()} colorScheme="pink">
-              Publish commitment to chain
+              Publish empty review on chain
             </Button>
             <Button colorScheme="purple">
               Disclose commitment to approver
             </Button>
           </Flex>
         ) : (
-          <CommitmentForm onSubmit={createReviewCommitment} />
+          <CommitmentForm onSubmit={setSignedCommitment} />
         )}
       </Flex>
     </Flex>

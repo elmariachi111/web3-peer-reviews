@@ -21,3 +21,10 @@ declare module "next-auth/jwt/types" {
     //    roles?: string[];
   }
 }
+
+export interface SignedCommitment {
+  privateAddress: string
+  signedPrivateAddress: string
+  anonAddress: string
+  signedAnonAddress: string
+}

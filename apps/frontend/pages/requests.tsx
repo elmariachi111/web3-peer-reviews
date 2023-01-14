@@ -56,8 +56,8 @@ export default function RequestList() {
                 </Text>
               </Td>
               <Td>
-                <Link href={`/commit/${r.args.antId}`} passHref legacyBehavior>
-                  <ChLink as={Button}>Commit</ChLink>
+                <Link href={`/review/${r.args.antId}`} passHref legacyBehavior>
+                  <ChLink as={Button}>Review</ChLink>
                 </Link>
               </Td>
             </Tr>
