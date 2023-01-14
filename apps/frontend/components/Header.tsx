@@ -1,13 +1,14 @@
-import { Button, ButtonGroup, Link, Flex } from "@chakra-ui/react"
+import { Button, ButtonGroup, Link, Flex, Text } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { useAccount } from "wagmi"
 import { useTokenContract } from "../hooks/useTokenContract"
+import NextLink from "next/link"
 
 export const Header = () => {
-  const { address } = useAccount()
+  const { address, isConnected } = useAccount()
   const [mappedOrcid, setMappedOrcid] = useState<string>()
-  const { contract: reviewContract, orchidContract } = useTokenContract()
+  const { orchidContract } = useTokenContract()
 
   useEffect(() => {
     if (!orchidContract || !address) return
@@ -26,26 +27,37 @@ export const Header = () => {
       borderBottomWidth="1px"
       borderBottomColor="gray.200"
     >
-      <Link href="/">P33R Review</Link>
-      <ButtonGroup isAttached gap={2}>
+      <NextLink href="/">
+        <Text fontWeight="bold" fontStyle="italic" fontSize="2xl">
+          P33R Review
+        </Text>
+      </NextLink>
+      <ButtonGroup isAttached gap={2} alignItems="center">
         <ConnectButton />
 
         {mappedOrcid ? (
-          <Flex direction="column">
-            <div className="hover:underline">
-              <Link href={`https://orcid.org/${mappedOrcid}`} target="_blank">
-                {mappedOrcid}
-              </Link>
-            </div>
+          <Flex direction="column" align="center" fontSize="sm">
+            <Text>Orcid connected</Text>
+            <Link
+              href={`https://orcid.org/${mappedOrcid}`}
+              isExternal
+              fontSize="xs"
+            >
+              {mappedOrcid}
+            </Link>
           </Flex>
-        ) : (
-          <Link
-            as={Button}
-            href={"https://orcidauth.vercel.app/register"}
-            isExternal
+        ) : isConnected ? (
+          <NextLink
+            href="https://orcidauth.vercel.app/register"
+            passHref
+            legacyBehavior
           >
-            Register with ORCID
-          </Link>
+            <Button as="a" target="_blank">
+              Connect your ORCID
+            </Button>
+          </NextLink>
+        ) : (
+          <></>
         )}
       </ButtonGroup>
     </Flex>
