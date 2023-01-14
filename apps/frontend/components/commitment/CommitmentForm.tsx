@@ -66,6 +66,8 @@ export const CommitmentForm = (props: {
   const [anonAddress, setAnonAddress] = useState<string>()
   const [signedAnonAddress, setSignedAnonAddress] = useState<string>()
 
+  const [reviewUrl, setReviewUrl] = useState<string>("")
+
   const canBeSubmitted = useMemo(() => {
     if (!privateAddress || !anonAddress) return false
     if (privateAddress.length < 40 || anonAddress.length < 40) return false
@@ -81,13 +83,21 @@ export const CommitmentForm = (props: {
       anonAddress,
       signedAnonAddress
     )
+    if (!reviewUrl) return false
+
     if (anonAddressSigner !== privateAddress) return false
 
     return true
-  }, [privateAddress, anonAddress, signedPrivateAddress, signedAnonAddress])
+  }, [
+    privateAddress,
+    anonAddress,
+    signedPrivateAddress,
+    signedAnonAddress,
+    reviewUrl,
+  ])
 
   return (
-    <Flex direction="column" gap={2}>
+    <Flex direction="column" gap={6}>
       <Flex direction="row" align="flex-end" gap={2}>
         <FormControl>
           <FormLabel>Private Address</FormLabel>
@@ -128,6 +138,19 @@ export const CommitmentForm = (props: {
           />
         )}
       </Flex>
+
+      <FormControl>
+        <FormLabel>provide a link to your peer review</FormLabel>
+        <FormHelperText>
+          In reality this would be more IPFS content
+        </FormHelperText>
+        <Input
+          type="text"
+          value={reviewUrl}
+          onChange={(e) => setReviewUrl(e.target.value)}
+        ></Input>
+      </FormControl>
+
       <Button
         type="submit"
         disabled={!canBeSubmitted}
@@ -137,6 +160,7 @@ export const CommitmentForm = (props: {
             signedPrivateAddress: signedPrivateAddress!,
             anonAddress: anonAddress!,
             signedAnonAddress: signedAnonAddress!,
+            reviewUrl,
           })
         }
       >

@@ -27,4 +27,5 @@ export interface SignedCommitment {
   signedPrivateAddress: string
   anonAddress: string
   signedAnonAddress: string
+  reviewUrl: string
 }
