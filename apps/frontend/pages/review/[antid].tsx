@@ -1,9 +1,10 @@
 import { Box, Button, Code, Flex, Heading, Text } from "@chakra-ui/react"
 import { ethers } from "ethers"
 import { useRouter } from "next/router"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useState } from "react"
 import { CommitmentForm } from "../../components/commitment/CommitmentForm"
 import { SubmittedReviews } from "../../components/review/SubmittedReviews"
+import { useApprover } from "../../hooks/useApprover"
 import { useTokenContract } from "../../hooks/useTokenContract"
 import { SignedCommitment } from "../../types"
 
@@ -15,12 +16,7 @@ export default function Review() {
   const [signedCommitment, setSignedCommitment] = useState<SignedCommitment>()
   const [commitmentDisclosure, setCommitmentDisclosure] = useState<any>({})
 
-  const [approver, setApprover] = useState<string>()
-
-  useEffect(() => {
-    if (!antContract) return
-    antContract.getApprover(antid as string, 0).then(setApprover)
-  }, [antContract, antid])
+  const { approver } = useApprover(antid as string)
 
   const anchorCommitment = useCallback(async () => {
     if (!signedCommitment || !antContract) return
@@ -54,9 +50,7 @@ export default function Review() {
           </Box>
         )}
       </Flex>
-      <Heading size="md">Submitted Peer Reviews</Heading>
       <SubmittedReviews antid={antid as string} approver={approver} />
-
       <Flex my={4} w="full" direction="column">
         <Heading size="md" mb={2}>
           Commit to peer review this request

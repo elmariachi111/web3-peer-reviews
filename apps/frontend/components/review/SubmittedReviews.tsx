@@ -2,6 +2,7 @@ import { Button, Link, Table, Td, Th, Tr } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 import { useAccount } from "wagmi"
 import { useTokenContract } from "../../hooks/useTokenContract"
+import NextLink from "next/link"
 
 export const SubmittedReviews = (props: {
   antid: string
@@ -37,7 +38,9 @@ export const SubmittedReviews = (props: {
         <Th>Actions</Th>
       </Tr>
       {submittedReviews.map((submission) => (
-        <Tr key={submission.args.antId}>
+        <Tr
+          key={`${submission.args.antId.toNumber()}-${submission.args.reviewId.toNumber()}`}
+        >
           <Td>{submission.args.peer_reviewer}</Td>
           <Td>
             <Link href={submission.args.reviewHash} isExternal>
@@ -46,7 +49,14 @@ export const SubmittedReviews = (props: {
           </Td>
           <Td>
             {props.approver?.toLowerCase() === address?.toLowerCase() && (
-              <Button>approve</Button>
+              <NextLink
+                href={`/approve/${props.antid}/${submission.args.reviewId}`}
+                passHref
+              >
+                <Button as="a" colorScheme="pink">
+                  approve
+                </Button>
+              </NextLink>
             )}
           </Td>
         </Tr>
