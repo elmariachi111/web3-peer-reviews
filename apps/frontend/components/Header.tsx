@@ -1,21 +1,12 @@
-import { Button, ButtonGroup, Link, Flex } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+import { Button, ButtonGroup, Flex, Text } from "@chakra-ui/react"
+import React from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { useAccount } from "wagmi"
-import { useTokenContract } from "../hooks/useTokenContract"
+import { signIn, signOut, useSession } from "next-auth/react"
+import Link from "next/link"
 
 export const Header = () => {
-  const { address } = useAccount()
-  const [mappedOrcid, setMappedOrcid] = useState<string>()
-  const { contract: reviewContract, orchidContract } = useTokenContract()
-
-  useEffect(() => {
-    if (!orchidContract || !address) return
-    ;(async () => {
-      setMappedOrcid(await orchidContract.addressToOrcid(address))
-    })()
-  }, [address, orchidContract])
-
+  const { data: session, status } = useSession()
+  console.log(session)
   return (
     <Flex
       w="full"
@@ -26,26 +17,21 @@ export const Header = () => {
       borderBottomWidth="1px"
       borderBottomColor="gray.200"
     >
-      <Link href="/">P33R Review</Link>
+      <Link href="/">@app</Link>
       <ButtonGroup isAttached gap={2}>
         <ConnectButton />
 
-        {mappedOrcid ? (
+        {status == "authenticated" ? (
           <Flex direction="column">
-            <div className="hover:underline">
-              <Link href={`https://orcid.org/${mappedOrcid}`} target="_blank">
-                {mappedOrcid}
-              </Link>
-            </div>
+            <Text fontWeight="bold" fontSize="sm" title={session.user?.orcid}>
+              {session?.user?.username}
+            </Text>
+            <Button onClick={() => signOut()} size="xs">
+              sign out
+            </Button>
           </Flex>
         ) : (
-          <Link
-            as={Button}
-            href={"https://orcidauth.vercel.app/register"}
-            isExternal
-          >
-            Register with ORCID
-          </Link>
+          <Button onClick={() => signIn()}>sign in with Orcid</Button>
         )}
       </ButtonGroup>
     </Flex>
