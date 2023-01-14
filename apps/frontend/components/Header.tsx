@@ -1,22 +1,13 @@
-import { Button, ButtonGroup, Link, Flex, Text } from "@chakra-ui/react"
-import { useEffect, useState } from "react"
+import { Button, ButtonGroup, Flex, Link, Text } from "@chakra-ui/react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { useAccount } from "wagmi"
-import { useTokenContract } from "../hooks/useTokenContract"
 import NextLink from "next/link"
+import { useAccount } from "wagmi"
+import { useOrcidMap } from "../hooks/useOrcidMap"
 
 export const Header = () => {
   const { address, isConnected } = useAccount()
-  const [mappedOrcid, setMappedOrcid] = useState<string>()
-  const { orchidContract } = useTokenContract()
 
-  useEffect(() => {
-    if (!orchidContract || !address) return
-    ;(async () => {
-      setMappedOrcid(await orchidContract.addressToOrcid(address))
-    })()
-  }, [address, orchidContract])
-
+  const { orcid } = useOrcidMap(address)
   return (
     <Flex
       w="full"
@@ -35,15 +26,11 @@ export const Header = () => {
       <ButtonGroup isAttached gap={2} alignItems="center">
         <ConnectButton />
 
-        {mappedOrcid ? (
+        {orcid ? (
           <Flex direction="column" align="center" fontSize="sm">
             <Text>Orcid connected</Text>
-            <Link
-              href={`https://orcid.org/${mappedOrcid}`}
-              isExternal
-              fontSize="xs"
-            >
-              {mappedOrcid}
+            <Link href={`https://orcid.org/${orcid}`} isExternal fontSize="xs">
+              {orcid}
             </Link>
           </Flex>
         ) : isConnected ? (
