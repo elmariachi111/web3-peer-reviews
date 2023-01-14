@@ -22,7 +22,7 @@ const ApproverForReview = (props: { antid: string }) => {
     reviewContract.getApprover(props.antid, 0).then(setApprover)
   }, [props.antid, reviewContract])
   return (
-    <Text maxWidth={100} isTruncated>
+    <Text maxWidth={150} isTruncated>
       {approver}
     </Text>
   )
@@ -59,7 +59,7 @@ export default function RequestList() {
             <Tr key={r.args.antId}>
               <Td>{r.args.antId.toNumber()}</Td>
               <Td>
-                <Text maxWidth={100} isTruncated>
+                <Text maxWidth={150} isTruncated>
                   {r.args.issuers[0]}
                 </Text>
               </Td>
@@ -71,7 +71,12 @@ export default function RequestList() {
               </Td>
               <Td>
                 <Text maxWidth={100} isTruncated>
-                  {r.args.paperHash}
+                  <ChLink
+                    href={`https://w3s.link/ipfs/${r.args.paperHash}`}
+                    isExternal
+                  >
+                    {r.args.paperHash}
+                  </ChLink>
                 </Text>
               </Td>
               <Td>
