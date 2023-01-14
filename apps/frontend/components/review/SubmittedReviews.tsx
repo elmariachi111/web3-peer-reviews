@@ -1,11 +1,17 @@
-import { Heading, Table, Td, Th, Tr } from "@chakra-ui/react"
+import { Button, Link, Table, Td, Th, Tr } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
+import { useAccount } from "wagmi"
 import { useTokenContract } from "../../hooks/useTokenContract"
 
-export const SubmittedReviews = (props: { antid: string }) => {
+export const SubmittedReviews = (props: {
+  antid: string
+  approver?: string
+}) => {
   const { contract: reviewContract, chainConfig } = useTokenContract()
+  const { address } = useAccount()
 
   const [submittedReviews, setSubmittedReviews] = useState<any[]>([])
+
   useEffect(() => {
     if (!reviewContract || !chainConfig) return
     ;(async () => {
@@ -24,18 +30,27 @@ export const SubmittedReviews = (props: { antid: string }) => {
   }, [chainConfig, props.antid, reviewContract])
 
   return (
-    <>
-      <Heading size="md">Submitted Peer Reviews</Heading>
-      <Table>
-        <Tr>
-          <Th>Reviewer</Th>
+    <Table>
+      <Tr>
+        <Th>Reviewer</Th>
+        <Th>Review</Th>
+        <Th>Actions</Th>
+      </Tr>
+      {submittedReviews.map((submission) => (
+        <Tr key={submission.args.antId}>
+          <Td>{submission.args.peer_reviewer}</Td>
+          <Td>
+            <Link href={submission.args.reviewHash} isExternal>
+              {submission.args.reviewHash}
+            </Link>
+          </Td>
+          <Td>
+            {props.approver?.toLowerCase() === address?.toLowerCase() && (
+              <Button>approve</Button>
+            )}
+          </Td>
         </Tr>
-        {submittedReviews.map((submission) => (
-          <Tr key={submission.args.antId}>
-            <Td>{submission.args.peer_reviewer}</Td>
-          </Tr>
-        ))}
-      </Table>
-    </>
+      ))}
+    </Table>
   )
 }

@@ -1,7 +1,7 @@
-import { Button, Code, Flex, Heading, Spacer, Text } from "@chakra-ui/react"
+import { Box, Button, Code, Flex, Heading, Text } from "@chakra-ui/react"
 import { ethers } from "ethers"
 import { useRouter } from "next/router"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { CommitmentForm } from "../../components/commitment/CommitmentForm"
 import { SubmittedReviews } from "../../components/review/SubmittedReviews"
 import { useTokenContract } from "../../hooks/useTokenContract"
@@ -10,13 +10,17 @@ import { SignedCommitment } from "../../types"
 export default function Review() {
   const { query } = useRouter()
   const { antid } = query
+  const { contract: antContract } = useTokenContract()
 
   const [signedCommitment, setSignedCommitment] = useState<SignedCommitment>()
-  const [commitmentDisclosure, setCommitmentDisclosure] = useState<any>({
-    foo: "bar",
-  })
+  const [commitmentDisclosure, setCommitmentDisclosure] = useState<any>({})
 
-  const { contract: antContract } = useTokenContract()
+  const [approver, setApprover] = useState<string>()
+
+  useEffect(() => {
+    if (!antContract) return
+    antContract.getApprover(antid as string, 0).then(setApprover)
+  }, [antContract, antid])
 
   const anchorCommitment = useCallback(async () => {
     if (!signedCommitment || !antContract) return
@@ -38,13 +42,24 @@ export default function Review() {
   }, [antContract, antid, signedCommitment])
 
   return (
-    <Flex direction="column">
-      <SubmittedReviews antid={antid as string} />
-      <Spacer my={8} />
-      <Heading mb={2}>Apply to peer review request #{antid}</Heading>
+    <Flex direction="column" gap={4}>
+      <Flex direction="row" align="center" justify="space-between">
+        <Heading mb={2}>Peer review request #{antid}</Heading>
+        {approver && (
+          <Box textAlign="right" fontSize="sm">
+            can be approved by{" "}
+            <Text maxW={200} isTruncated>
+              {approver}
+            </Text>
+          </Box>
+        )}
+      </Flex>
+      <Heading size="md">Submitted Peer Reviews</Heading>
+      <SubmittedReviews antid={antid as string} approver={approver} />
+
       <Flex my={4} w="full" direction="column">
         <Heading size="md" mb={2}>
-          Create Commitment
+          Commit to peer review this request
         </Heading>
         <CommitmentForm onSubmit={setSignedCommitment} />
         {signedCommitment && (
