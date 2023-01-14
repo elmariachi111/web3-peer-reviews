@@ -1,4 +1,11 @@
 import {
+  Alert,
+  AlertDescription,
+  AlertIcon,
+  AlertTitle,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
   Button,
   Flex,
   FormControl,
@@ -15,7 +22,7 @@ import { useApprover } from "../../../hooks/useApprover"
 import { useOrcidMap } from "../../../hooks/useOrcidMap"
 import { useTokenContract } from "../../../hooks/useTokenContract"
 import { SignedCommitment } from "../../../types"
-
+import NextLink from "next/link"
 type PeerReview = {
   accepted: boolean
   peer_reviewer: string
@@ -32,29 +39,27 @@ const VerifyPeerReviewer = (props: { peerReview: PeerReview }) => {
   const { orchidContract } = useTokenContract()
 
   const [proofString, setProofString] = useState<string>("")
-
-  const [error, setError] = useState<string>()
-  const [isValid, setValid] = useState<boolean>()
-
-  const proof: SignedCommitment = useMemo(() => {
-    try {
-      return JSON.parse(proofString)
-    } catch (e: any) {
-      return null
+  const [proof, setProof] = useState<{
+    proof?: SignedCommitment
+    validation: {
+      json?: boolean | string
+      hash?: boolean | string
+      privateSig?: boolean | string
+      anonSig?: boolean | string
     }
-  }, [proofString])
+  }>()
 
-  useEffect(() => {
-    if (!proof) {
-      setError(undefined)
-      setValid(false)
-      return
-    }
+  const allTrue = (o: any) => {
+    if (!o) return undefined
+    return Object.values(o).filter((v) => v !== true).length === 0
+  }
 
-    const invalidate = (reason: string) => {
-      setError(reason)
-      setValid(false)
-    }
+  const isProofValid = useMemo(() => {
+    if (!proof?.validation) return
+    return allTrue(proof.validation)
+  }, [proof])
+
+  const validateHash = (proof: SignedCommitment) => {
     const conc = ethers.utils.hexConcat([
       proof.privateAddress,
       proof.signedPrivateAddress,
@@ -62,41 +67,65 @@ const VerifyPeerReviewer = (props: { peerReview: PeerReview }) => {
       proof.signedAnonAddress,
     ])
     const hash = ethers.utils.keccak256(conc)
-    if (hash != peerReview.orcidProof) {
-      invalidate("proof hash is invalid")
+    return hash === peerReview.orcidProof || "proof hash is invalid"
+  }
 
+  const validatePrivateAddressSig = (proof: SignedCommitment) => {
+    return (
+      proof.anonAddress ===
+        ethers.utils.verifyMessage(
+          proof.privateAddress,
+          proof.signedPrivateAddress
+        ) || "signature over private address is invalid"
+    )
+  }
+
+  const validateAnonAddressSig = (proof: SignedCommitment) => {
+    return (
+      proof.privateAddress ===
+        ethers.utils.verifyMessage(
+          proof.anonAddress,
+          proof.signedAnonAddress
+        ) || "signature over anon address is invalid"
+    )
+  }
+
+  const validate = (proofString: string) => {
+    let proof: SignedCommitment
+    try {
+      proof = JSON.parse(proofString)
+    } catch (e: any) {
+      setProof({
+        proof: undefined,
+        validation: {
+          json: "can't parse json",
+        },
+      })
       return
     }
-
-    if (
-      proof.anonAddress !==
-      ethers.utils.verifyMessage(
-        proof.privateAddress,
-        proof.signedPrivateAddress
-      )
-    ) {
-      invalidate("signature over private address is invalid")
-      return
+    const _validation = {
+      json: true,
+      anonSig: validateAnonAddressSig(proof),
+      privateSig: validatePrivateAddressSig(proof),
+      hash: validateHash(proof),
     }
-
-    if (
-      proof.privateAddress !==
-      ethers.utils.verifyMessage(proof.anonAddress, proof.signedAnonAddress)
-    ) {
-      invalidate("signature over anon address is invalid")
-      return
-    }
-
-    setValid(true)
-  }, [peerReview.orcidProof, proof])
+    console.log(_validation, allTrue(_validation))
+    setProof({
+      proof,
+      validation: _validation,
+    })
+  }
 
   useEffect(() => {
-    if (!proof || !isValid || !orchidContract) return
-    ;async () => {
-      const _orcid = await orchidContract.addressToOrcid(proof.privateAddress)
-      setPrivateOrcid(_orcid)
-    }
-  }, [proof, isValid, orchidContract])
+    if (!proof || !allTrue(proof.validation) || !orchidContract) return
+    const { proof: _proof } = proof
+    if (!_proof) return
+    ;(async () => {
+      setPrivateOrcid(
+        await orchidContract.addressToOrcid(_proof.privateAddress)
+      )
+    })()
+  }, [orchidContract, proof])
 
   return (
     <Flex direction="column" gap={2}>
@@ -112,8 +141,43 @@ const VerifyPeerReviewer = (props: { peerReview: PeerReview }) => {
           onChange={(e) => setProofString(e.target.value)}
         ></Textarea>
       </FormControl>
-      <Button>verify</Button>
-      <Text>{proof?.privateAddress}</Text>
+      <Button onClick={() => validate(proofString)}>verify</Button>
+      {proof?.proof && (
+        <Flex direction="column">
+          <Alert status={isProofValid ? "success" : "error"}>
+            <AlertIcon />
+            <AlertTitle>
+              {isProofValid ? "The proof is valid" : "The proof is not valid"}
+            </AlertTitle>
+          </Alert>
+          {privateOrcid ? (
+            <Alert status="success">
+              <AlertIcon />
+              <AlertTitle>
+                The reviewer&apos;s private account has an attached ORCID
+              </AlertTitle>
+              <AlertDescription>
+                Check out their{" "}
+                <Link href={`https://orcid.org/${privateOrcid}`}>
+                  {" "}
+                  ORCID profile
+                </Link>
+                .
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <Alert status="warning">
+              <AlertIcon />
+              <AlertTitle>
+                The reviewer&apos;s private account is not attached to an ORCID
+              </AlertTitle>
+              <AlertDescription>
+                the private account address is: {proof.proof.privateAddress}
+              </AlertDescription>
+            </Alert>
+          )}
+        </Flex>
+      )}
     </Flex>
   )
 }
@@ -139,20 +203,30 @@ export default function Approve() {
 
   return (
     <Flex direction="column">
+      <Breadcrumb fontSize="sm" color="gray.500" my={8} separator=">">
+        <BreadcrumbItem>
+          <NextLink href={`/review/${antid}`} passHref>
+            <BreadcrumbLink>Review Request {antid}</BreadcrumbLink>
+          </NextLink>
+        </BreadcrumbItem>
+        <BreadcrumbItem isCurrentPage>
+          <NextLink href={`/review/${antid}/${reviewId}`} passHref>
+            <BreadcrumbLink>Peer Review {reviewId}</BreadcrumbLink>
+          </NextLink>
+        </BreadcrumbItem>
+      </Breadcrumb>
+
       <Heading mb={4}>
         Approve Peer Review {antid}/{reviewId}
       </Heading>
       {!peerReview ? (
         "connect your wallet"
       ) : (
-        <Flex direction="column">
-          <Text>
-            Submitted by {peerReview.peer_reviewer}{" "}
-            <Link href={peerReview.reviewHash} isExternal>
-              Review Content
-            </Link>{" "}
-          </Text>
-          <Text></Text>
+        <Flex direction="column" gap={4}>
+          <Text>Submitted by {peerReview.peer_reviewer} </Text>
+          <Link href={peerReview.reviewHash} isExternal>
+            Review Content
+          </Link>{" "}
           <VerifyPeerReviewer peerReview={peerReview} />
         </Flex>
       )}
