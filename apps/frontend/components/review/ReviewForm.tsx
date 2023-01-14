@@ -6,7 +6,7 @@ import {
   Heading,
   Input,
 } from "@chakra-ui/react"
-import { ChangeEvent, useCallback, useEffect, useRef } from "react"
+import { ChangeEvent, useCallback, useEffect, useRef, useState } from "react"
 import { Controller, useForm } from "react-hook-form"
 import { useAccount } from "wagmi"
 import { SingleDatepicker } from "chakra-dayzed-datepicker"
@@ -14,14 +14,17 @@ import { Web3Storage } from "web3.storage"
 
 export const ReviewForm = (props: { onSubmit: (data: any) => void }) => {
   const { address } = useAccount()
+  const [isUploading, setIsUploading] = useState<boolean>(false)
 
   const uploadFile = useCallback(async (file: File) => {
     const w3sClient = new Web3Storage({
       token: process.env.NEXT_PUBLIC_WEB3_AUTH_APIKEY as string,
     })
+    setIsUploading(true)
     const rootCid = await w3sClient.put([file], {
       wrapWithDirectory: false,
     })
+    setIsUploading(false)
     return rootCid
   }, [])
 
@@ -93,7 +96,7 @@ export const ReviewForm = (props: { onSubmit: (data: any) => void }) => {
               ref={inputRef}
               hidden
             />
-            <Button isLoading={false}>Upload</Button>
+            <Button isLoading={isUploading}>Upload</Button>
           </Flex>
         </Flex>
         <FormControl>
