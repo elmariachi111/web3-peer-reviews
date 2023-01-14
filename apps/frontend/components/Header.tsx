@@ -2,6 +2,7 @@ import { Button, ButtonGroup, Flex, Text } from "@chakra-ui/react"
 import React from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
 import { signIn, signOut, useSession } from "next-auth/react"
+import Link from "next/link"
 
 export const Header = () => {
   const { data: session, status } = useSession()
@@ -16,7 +17,7 @@ export const Header = () => {
       borderBottomWidth="1px"
       borderBottomColor="gray.200"
     >
-      <Text>@app</Text>
+      <Link href="/">@app</Link>
       <ButtonGroup isAttached gap={2}>
         <ConnectButton />
 
@@ -30,7 +31,7 @@ export const Header = () => {
             </Button>
           </Flex>
         ) : (
-          <Button onClick={() => signIn()}>sign in with ORCID</Button>
+          <Button onClick={() => signIn()}>sign in with Orcid</Button>
         )}
       </ButtonGroup>
     </Flex>
