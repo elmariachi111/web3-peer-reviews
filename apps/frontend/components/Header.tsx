@@ -1,12 +1,22 @@
-import { Button, ButtonGroup, Flex, Text } from "@chakra-ui/react"
-import React from "react"
+import { Button, ButtonGroup, Link, Flex, Text } from "@chakra-ui/react"
+import { useEffect, useState } from "react"
 import { ConnectButton } from "@rainbow-me/rainbowkit"
-import { signIn, signOut, useSession } from "next-auth/react"
-import Link from "next/link"
+import { useAccount } from "wagmi"
+import { useTokenContract } from "../hooks/useTokenContract"
+import NextLink from "next/link"
 
 export const Header = () => {
-  const { data: session, status } = useSession()
-  console.log(session)
+  const { address, isConnected } = useAccount()
+  const [mappedOrcid, setMappedOrcid] = useState<string>()
+  const { orchidContract } = useTokenContract()
+
+  useEffect(() => {
+    if (!orchidContract || !address) return
+    ;(async () => {
+      setMappedOrcid(await orchidContract.addressToOrcid(address))
+    })()
+  }, [address, orchidContract])
+
   return (
     <Flex
       w="full"
@@ -17,21 +27,37 @@ export const Header = () => {
       borderBottomWidth="1px"
       borderBottomColor="gray.200"
     >
-      <Link href="/">@app</Link>
-      <ButtonGroup isAttached gap={2}>
+      <NextLink href="/">
+        <Text fontWeight="bold" fontStyle="italic" fontSize="2xl">
+          P33R Review
+        </Text>
+      </NextLink>
+      <ButtonGroup isAttached gap={2} alignItems="center">
         <ConnectButton />
 
-        {status == "authenticated" ? (
-          <Flex direction="column">
-            <Text fontWeight="bold" fontSize="sm" title={session.user?.orcid}>
-              {session?.user?.username}
-            </Text>
-            <Button onClick={() => signOut()} size="xs">
-              sign out
-            </Button>
+        {mappedOrcid ? (
+          <Flex direction="column" align="center" fontSize="sm">
+            <Text>Orcid connected</Text>
+            <Link
+              href={`https://orcid.org/${mappedOrcid}`}
+              isExternal
+              fontSize="xs"
+            >
+              {mappedOrcid}
+            </Link>
           </Flex>
+        ) : isConnected ? (
+          <NextLink
+            href="https://orcidauth.vercel.app/register"
+            passHref
+            legacyBehavior
+          >
+            <Button as="a" target="_blank">
+              Connect your ORCID
+            </Button>
+          </NextLink>
         ) : (
-          <Button onClick={() => signIn()}>sign in with Orcid</Button>
+          <></>
         )}
       </ButtonGroup>
     </Flex>
