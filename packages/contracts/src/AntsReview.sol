@@ -59,6 +59,7 @@ contract AntsReview is AntsReviewRoles {
     bool accepted;
     address payable peer_reviewer;
     string reviewHash;
+    bytes32 orcidProof;
   }
 
   struct Contribution {
@@ -122,11 +123,6 @@ contract AntsReview is AntsReviewRoles {
     _;
   }
 
-  modifier peerReviewNotYetAccepted(uint256 _antId, uint256 _reviewId) {
-    require(peer_reviews[_antId][_reviewId].accepted == false);
-    _;
-  }
-
   modifier validateDeadline(uint256 _deadline) {
     require(_deadline > block.timestamp);
     _;
@@ -134,11 +130,6 @@ contract AntsReview is AntsReviewRoles {
 
   modifier isBeforeDeadline(uint256 _antId) {
     require(block.timestamp < antreviews[_antId].deadline);
-    _;
-  }
-
-  modifier validAmount(uint256 _amount) {
-    require(_amount > 0, "Insufficient amount");
     _;
   }
 
@@ -213,7 +204,7 @@ contract AntsReview is AntsReviewRoles {
     newAntReview.deadline = _deadline;
     newAntReview.status = AntReviewStatus.CREATED;
 
-    require(bytes(orcid.addressToOrcid(_issuers)) != 0, "This account has not been linked to ORCID");
+    //require(bytes(orcid.addressToOrcid(_issuers)).length != 0, "Your account must be linked to an ORCID to issue a peer review request");
     require(_addApprover(antId, _approver));
 
     antReviewIdTracker.increment();
@@ -299,20 +290,19 @@ contract AntsReview is AntsReviewRoles {
 
   /// @notice Contribute to an AntReview
   /// @param _antId The AntReview Id
-  /// @param _amount The Contribution amount
   /// @return True if the account is the contribution is successfully added
-  function contribute(uint256 _antId, uint256 _amount)
+  function contribute(uint256 _antId)
     external
     payable
     antReviewExists(_antId)
-    validAmount(_amount)
     whenNotPaused
     returns (bool)
   {
+    uint256 _amount = msg.value;
+    require(_amount > 0, "Please be more generous");
+
     contributions[_antId].push(Contribution(payable(msg.sender), _amount, false));
     antreviews[_antId].balance = antreviews[_antId].balance.add(_amount);
-
-    require(msg.value >= _amount);
 
     emit ContributionAdded(_antId, contributions[_antId].length.sub(1), msg.sender, _amount);
 
@@ -347,12 +337,15 @@ contract AntsReview is AntsReviewRoles {
     return true;
   }
 
-  /// @notice Submit a fulfillment for the given antReview
-  /// @dev Access unrestricted
+  /// @notice Submits a peer review for the given antReview
+  /// @dev submitters must either have a linked orcid account (their identity is known), or they must provide a proof hash that approvers can check
+  /// @dev privacy preferring reviewers disclose cleartext messages & sigs to approvers.
+  /// @dev Approvers can verify the sigs, hash them and compare the hash with the provided _orcidProof
   /// @param _antId The AntReview Id
   /// @param _reviewHash The IPFS Hash of the peer-review
+  /// @param _orcidProof optional: keccak( sig(anon -> private) + sig(private -> anon) )
   /// @return True If the AntReview is successfully fulfilled
-  function fulfillAntReview(uint256 _antId, string calldata _reviewHash)
+  function submitPeerReview(uint256 _antId, string calldata _reviewHash, bytes32 _orcidProof)
     external
     antReviewExists(_antId)
     hasStatus(_antId, AntReviewStatus.CREATED)
@@ -360,8 +353,14 @@ contract AntsReview is AntsReviewRoles {
     whenNotPaused
     returns (bool)
   {
-    peer_reviews[_antId].push(Peer_Review(false, payable(msg.sender), _reviewHash));
+    if (uint256(_orcidProof) == 0) {
+      //no proof provided, lets check if the sender has a linked their profile
+      require(bytes(orcid.addressToOrcid(msg.sender)).length != 0, "account not linked with ORCID");
+    }
 
+    peer_reviews[_antId].push(Peer_Review(false, payable(msg.sender), _reviewHash, _orcidProof));
+
+    //todo this should be called "PeerReviewSubmitted"
     emit AntReviewFulfilled(_antId, peer_reviews[_antId].length.sub(1), msg.sender, _reviewHash);
     return true;
   }
@@ -387,7 +386,7 @@ contract AntsReview is AntsReviewRoles {
     return true;
   }
 
-  /// @notice Accept a given Peer-Review
+  /// @notice Allows Approvers to accept a peer review
   /// @dev Access restricted to Approver
   /// @param _antId The AntReview Id
   /// @param _reviewId The Peer_Review Id
@@ -397,10 +396,14 @@ contract AntsReview is AntsReviewRoles {
     onlyApprover(_antId)
     reviewExists(_antId, _reviewId)
     hasStatus(_antId, AntReviewStatus.CREATED)
-    peerReviewNotYetAccepted(_antId, _reviewId)
     whenNotPaused
     returns (bool)
   {
+    require(
+      peer_reviews[_antId][_reviewId].accepted == false, "this peer review already is accepted"
+    );
+    peer_reviews[_antId][_reviewId].accepted = true;
+
     antreviews[_antId].status = AntReviewStatus.PAID;
     antreviews[_antId].balance = antreviews[_antId].balance.sub(_amount);
 
@@ -410,6 +413,9 @@ contract AntsReview is AntsReviewRoles {
     return true;
   }
 
+  ///todo: well. After the deadline has passed, ANY issuer (coauthor)
+  ///todo: may withdraw ANY amount from the contribution funds
+  ///todo: that means that we just have to wait until the deadline passes and can get all the contributor's money without having any peer review to pass :D
   /// @notice Withdraw AntReview
   /// @dev Access restricted to Issuer
   /// @param _antId The AntReview Id
@@ -424,7 +430,7 @@ contract AntsReview is AntsReviewRoles {
     returns (bool)
   {
     require(block.timestamp > antreviews[_antId].deadline, "Deadline has not elapsed");
-    require(antreviews[_antId].balance >= _amount, "Amount exceed AntReview balance");
+    require(antreviews[_antId].balance >= _amount, "Amount exceeds AntReview balance");
 
     antreviews[_antId].balance = antreviews[_antId].balance.sub(_amount);
 

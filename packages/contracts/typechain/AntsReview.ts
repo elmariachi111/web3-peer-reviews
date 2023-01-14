@@ -33,7 +33,6 @@ export interface AntsReviewInterface extends utils.Interface {
   functions: {
     "DEFAULT_ADMIN_ROLE()": FunctionFragment;
     "ISSUER_ROLE()": FunctionFragment;
-    "ORCID_CONTRACT_ADD()": FunctionFragment;
     "PAUSER_ROLE()": FunctionFragment;
     "PEER_REVIEWER_ROLE()": FunctionFragment;
     "acceptAntReview(uint256,uint256,uint256)": FunctionFragment;
@@ -43,9 +42,8 @@ export interface AntsReviewInterface extends utils.Interface {
     "antReviewIdTracker()": FunctionFragment;
     "antreviews(uint256)": FunctionFragment;
     "changeAntReview(uint256,uint256,address[],string,string,uint64)": FunctionFragment;
-    "contribute(uint256,uint256)": FunctionFragment;
+    "contribute(uint256)": FunctionFragment;
     "contributions(uint256,uint256)": FunctionFragment;
-    "fulfillAntReview(uint256,string)": FunctionFragment;
     "getApprover(uint256,uint256)": FunctionFragment;
     "getRoleAdmin(bytes32)": FunctionFragment;
     "grantRole(bytes32,address)": FunctionFragment;
@@ -66,6 +64,7 @@ export interface AntsReviewInterface extends utils.Interface {
     "renounceOwnership()": FunctionFragment;
     "renounceRole(bytes32,address)": FunctionFragment;
     "revokeRole(bytes32,address)": FunctionFragment;
+    "submitPeerReview(uint256,string,bytes32)": FunctionFragment;
     "supportsInterface(bytes4)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "unpause()": FunctionFragment;
@@ -77,7 +76,6 @@ export interface AntsReviewInterface extends utils.Interface {
     nameOrSignatureOrTopic:
       | "DEFAULT_ADMIN_ROLE"
       | "ISSUER_ROLE"
-      | "ORCID_CONTRACT_ADD"
       | "PAUSER_ROLE"
       | "PEER_REVIEWER_ROLE"
       | "acceptAntReview"
@@ -89,7 +87,6 @@ export interface AntsReviewInterface extends utils.Interface {
       | "changeAntReview"
       | "contribute"
       | "contributions"
-      | "fulfillAntReview"
       | "getApprover"
       | "getRoleAdmin"
       | "grantRole"
@@ -110,6 +107,7 @@ export interface AntsReviewInterface extends utils.Interface {
       | "renounceOwnership"
       | "renounceRole"
       | "revokeRole"
+      | "submitPeerReview"
       | "supportsInterface"
       | "transferOwnership"
       | "unpause"
@@ -123,10 +121,6 @@ export interface AntsReviewInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "ISSUER_ROLE",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "ORCID_CONTRACT_ADD",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -182,15 +176,11 @@ export interface AntsReviewInterface extends utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "contribute",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
+    values: [PromiseOrValue<BigNumberish>]
   ): string;
   encodeFunctionData(
     functionFragment: "contributions",
     values: [PromiseOrValue<BigNumberish>, PromiseOrValue<BigNumberish>]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "fulfillAntReview",
-    values: [PromiseOrValue<BigNumberish>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
     functionFragment: "getApprover",
@@ -271,6 +261,14 @@ export interface AntsReviewInterface extends utils.Interface {
     values: [PromiseOrValue<BytesLike>, PromiseOrValue<string>]
   ): string;
   encodeFunctionData(
+    functionFragment: "submitPeerReview",
+    values: [
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BytesLike>
+    ]
+  ): string;
+  encodeFunctionData(
     functionFragment: "supportsInterface",
     values: [PromiseOrValue<BytesLike>]
   ): string;
@@ -302,10 +300,6 @@ export interface AntsReviewInterface extends utils.Interface {
   ): Result;
   decodeFunctionResult(
     functionFragment: "ISSUER_ROLE",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "ORCID_CONTRACT_ADD",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -341,10 +335,6 @@ export interface AntsReviewInterface extends utils.Interface {
   decodeFunctionResult(functionFragment: "contribute", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "contributions",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "fulfillAntReview",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -397,6 +387,10 @@ export interface AntsReviewInterface extends utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "revokeRole", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "submitPeerReview",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "supportsInterface",
     data: BytesLike
@@ -683,8 +677,6 @@ export interface AntsReview extends BaseContract {
 
     ISSUER_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
-    ORCID_CONTRACT_ADD(overrides?: CallOverrides): Promise<[string]>;
-
     PAUSER_ROLE(overrides?: CallOverrides): Promise<[string]>;
 
     PEER_REVIEWER_ROLE(overrides?: CallOverrides): Promise<[string]>;
@@ -742,7 +734,6 @@ export interface AntsReview extends BaseContract {
 
     contribute(
       _antId: PromiseOrValue<BigNumberish>,
-      _amount: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
@@ -757,12 +748,6 @@ export interface AntsReview extends BaseContract {
         refunded: boolean;
       }
     >;
-
-    fulfillAntReview(
-      _antId: PromiseOrValue<BigNumberish>,
-      _reviewHash: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
-    ): Promise<ContractTransaction>;
 
     getApprover(
       _antId: PromiseOrValue<BigNumberish>,
@@ -826,10 +811,11 @@ export interface AntsReview extends BaseContract {
       arg1: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [boolean, string, string] & {
+      [boolean, string, string, string] & {
         accepted: boolean;
         peer_reviewer: string;
         reviewHash: string;
+        orcidProof: string;
       }
     >;
 
@@ -872,6 +858,13 @@ export interface AntsReview extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<ContractTransaction>;
 
+    submitPeerReview(
+      _antId: PromiseOrValue<BigNumberish>,
+      _reviewHash: PromiseOrValue<string>,
+      _orcidProof: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<ContractTransaction>;
+
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -904,8 +897,6 @@ export interface AntsReview extends BaseContract {
   DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
   ISSUER_ROLE(overrides?: CallOverrides): Promise<string>;
-
-  ORCID_CONTRACT_ADD(overrides?: CallOverrides): Promise<string>;
 
   PAUSER_ROLE(overrides?: CallOverrides): Promise<string>;
 
@@ -962,7 +953,6 @@ export interface AntsReview extends BaseContract {
 
   contribute(
     _antId: PromiseOrValue<BigNumberish>,
-    _amount: PromiseOrValue<BigNumberish>,
     overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
@@ -977,12 +967,6 @@ export interface AntsReview extends BaseContract {
       refunded: boolean;
     }
   >;
-
-  fulfillAntReview(
-    _antId: PromiseOrValue<BigNumberish>,
-    _reviewHash: PromiseOrValue<string>,
-    overrides?: Overrides & { from?: PromiseOrValue<string> }
-  ): Promise<ContractTransaction>;
 
   getApprover(
     _antId: PromiseOrValue<BigNumberish>,
@@ -1046,10 +1030,11 @@ export interface AntsReview extends BaseContract {
     arg1: PromiseOrValue<BigNumberish>,
     overrides?: CallOverrides
   ): Promise<
-    [boolean, string, string] & {
+    [boolean, string, string, string] & {
       accepted: boolean;
       peer_reviewer: string;
       reviewHash: string;
+      orcidProof: string;
     }
   >;
 
@@ -1092,6 +1077,13 @@ export interface AntsReview extends BaseContract {
     overrides?: Overrides & { from?: PromiseOrValue<string> }
   ): Promise<ContractTransaction>;
 
+  submitPeerReview(
+    _antId: PromiseOrValue<BigNumberish>,
+    _reviewHash: PromiseOrValue<string>,
+    _orcidProof: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> }
+  ): Promise<ContractTransaction>;
+
   supportsInterface(
     interfaceId: PromiseOrValue<BytesLike>,
     overrides?: CallOverrides
@@ -1124,8 +1116,6 @@ export interface AntsReview extends BaseContract {
     DEFAULT_ADMIN_ROLE(overrides?: CallOverrides): Promise<string>;
 
     ISSUER_ROLE(overrides?: CallOverrides): Promise<string>;
-
-    ORCID_CONTRACT_ADD(overrides?: CallOverrides): Promise<string>;
 
     PAUSER_ROLE(overrides?: CallOverrides): Promise<string>;
 
@@ -1182,7 +1172,6 @@ export interface AntsReview extends BaseContract {
 
     contribute(
       _antId: PromiseOrValue<BigNumberish>,
-      _amount: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<boolean>;
 
@@ -1197,12 +1186,6 @@ export interface AntsReview extends BaseContract {
         refunded: boolean;
       }
     >;
-
-    fulfillAntReview(
-      _antId: PromiseOrValue<BigNumberish>,
-      _reviewHash: PromiseOrValue<string>,
-      overrides?: CallOverrides
-    ): Promise<boolean>;
 
     getApprover(
       _antId: PromiseOrValue<BigNumberish>,
@@ -1264,10 +1247,11 @@ export interface AntsReview extends BaseContract {
       arg1: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
     ): Promise<
-      [boolean, string, string] & {
+      [boolean, string, string, string] & {
         accepted: boolean;
         peer_reviewer: string;
         reviewHash: string;
+        orcidProof: string;
       }
     >;
 
@@ -1307,6 +1291,13 @@ export interface AntsReview extends BaseContract {
       account: PromiseOrValue<string>,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    submitPeerReview(
+      _antId: PromiseOrValue<BigNumberish>,
+      _reviewHash: PromiseOrValue<string>,
+      _orcidProof: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides
+    ): Promise<boolean>;
 
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
@@ -1518,8 +1509,6 @@ export interface AntsReview extends BaseContract {
 
     ISSUER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
-    ORCID_CONTRACT_ADD(overrides?: CallOverrides): Promise<BigNumber>;
-
     PAUSER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
 
     PEER_REVIEWER_ROLE(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1567,7 +1556,6 @@ export interface AntsReview extends BaseContract {
 
     contribute(
       _antId: PromiseOrValue<BigNumberish>,
-      _amount: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
@@ -1575,12 +1563,6 @@ export interface AntsReview extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       arg1: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<BigNumber>;
-
-    fulfillAntReview(
-      _antId: PromiseOrValue<BigNumberish>,
-      _reviewHash: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
     getApprover(
@@ -1685,6 +1667,13 @@ export interface AntsReview extends BaseContract {
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<BigNumber>;
 
+    submitPeerReview(
+      _antId: PromiseOrValue<BigNumberish>,
+      _reviewHash: PromiseOrValue<string>,
+      _orcidProof: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<BigNumber>;
+
     supportsInterface(
       interfaceId: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides
@@ -1720,10 +1709,6 @@ export interface AntsReview extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     ISSUER_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    ORCID_CONTRACT_ADD(
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
 
     PAUSER_ROLE(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -1776,7 +1761,6 @@ export interface AntsReview extends BaseContract {
 
     contribute(
       _antId: PromiseOrValue<BigNumberish>,
-      _amount: PromiseOrValue<BigNumberish>,
       overrides?: PayableOverrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1784,12 +1768,6 @@ export interface AntsReview extends BaseContract {
       arg0: PromiseOrValue<BigNumberish>,
       arg1: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    fulfillAntReview(
-      _antId: PromiseOrValue<BigNumberish>,
-      _reviewHash: PromiseOrValue<string>,
-      overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
     getApprover(
@@ -1891,6 +1869,13 @@ export interface AntsReview extends BaseContract {
     revokeRole(
       role: PromiseOrValue<BytesLike>,
       account: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> }
+    ): Promise<PopulatedTransaction>;
+
+    submitPeerReview(
+      _antId: PromiseOrValue<BigNumberish>,
+      _reviewHash: PromiseOrValue<string>,
+      _orcidProof: PromiseOrValue<BytesLike>,
       overrides?: Overrides & { from?: PromiseOrValue<string> }
     ): Promise<PopulatedTransaction>;
 
