@@ -5,6 +5,7 @@ import { useRouter } from "next/router"
 import { useCallback, useEffect, useState } from "react"
 import { useAccount } from "wagmi"
 import { CommitmentForm } from "../../components/commitment/CommitmentForm"
+import { ContributeForm } from "../../components/review/ContributeForm"
 import { SubmittedReviews } from "../../components/review/SubmittedReviews"
 import { useApprover } from "../../hooks/useApprover"
 import { useTokenContract } from "../../hooks/useTokenContract"
@@ -78,9 +79,16 @@ export default function Review() {
         <Heading mb={2}>Peer review request #{antid}</Heading>
         <Flex direction="column">
           {antReview && (
-            <Text>
-              reviews accepted until {antReview.deadline.toUTCString()}
-            </Text>
+            <Flex fontSize="sm" direction="column">
+              <Text>
+                reviews accepted until {antReview.deadline.toUTCString()}
+              </Text>
+              <Text>
+                Balance:{" "}
+                {ethers.utils.formatEther(antReview.balance.toString())}
+                Matic
+              </Text>
+            </Flex>
           )}
           {approver && (
             <Flex textAlign="right" fontSize="sm">
@@ -96,7 +104,14 @@ export default function Review() {
       <SubmittedReviews antid={antid as string} approver={approver} />
       <Flex my={4} w="full" direction="column">
         <Heading size="md" mb={2}>
-          Commit to peer review this request
+          Fund this peer review request
+        </Heading>
+        <ContributeForm antid={antid as string} />
+      </Flex>
+
+      <Flex my={4} w="full" direction="column">
+        <Heading size="md" mb={2}>
+          File a private peer review for this request
         </Heading>
         <CommitmentForm onSubmit={setSignedCommitment} />
         {signedCommitment && (
