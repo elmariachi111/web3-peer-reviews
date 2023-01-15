@@ -194,6 +194,7 @@ export default function Approve() {
 
   const { approver } = useApprover(antid as string)
   const [peerReview, setPeerReview] = useState<PeerReview>()
+  const [balance, setBalance] = useState<string>()
 
   const toast = useToast()
 
@@ -205,20 +206,29 @@ export default function Approve() {
         reviewId as string
       )
       setPeerReview(_peerReview)
+
+      const request = await reviewContract.antreviews(antid as string)
+      setBalance(request.balance.toString())
     })()
   }, [antid, reviewContract, reviewId])
 
   const approveReview = useCallback(
     async (antid: string, reviewId: string) => {
       if (!reviewContract) return
-      const result = await reviewContract.acceptAntReview(antid, reviewId, 0)
+      if (balance === undefined) return
+
+      const result = await reviewContract.acceptAntReview(
+        antid,
+        reviewId,
+        balance
+      )
       console.log(result)
       toast({
         status: "success",
         title: "peer review approved",
       })
     },
-    [reviewContract, toast]
+    [balance, reviewContract, toast]
   )
 
   return (
@@ -251,6 +261,9 @@ export default function Approve() {
                 <Link href={peerReview.reviewHash} isExternal>
                   {peerReview.reviewHash}
                 </Link>
+              </Text>
+              <Text>
+                Bounty: {ethers.utils.formatEther(balance || 0)} MATIC{" "}
               </Text>
             </Flex>
             <Button
