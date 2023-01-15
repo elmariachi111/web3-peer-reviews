@@ -75,31 +75,39 @@ export default function Review() {
 
   return (
     <Flex direction="column" gap={4}>
-      <Flex direction="row" align="center" justify="space-between">
-        <Heading mb={2}>Peer review request #{antid}</Heading>
+      <Flex
+        direction="row"
+        align="center"
+        justify="space-between"
+        bg="gray.200"
+        p={4}
+        rounded="xl"
+      >
+        <Heading>Peer review request #{antid}</Heading>
         <Flex direction="column">
           {antReview && (
-            <Flex fontSize="sm" direction="column">
+            <Flex fontSize="sm" direction="column" align="flex-end">
               <Text>
-                reviews accepted until {antReview.deadline.toUTCString()}
+                accepts reviews until {antReview.deadline.toUTCString()}
               </Text>
               <Text>
                 Balance:{" "}
                 {ethers.utils.formatEther(antReview.balance.toString())}
                 Matic
               </Text>
-            </Flex>
-          )}
-          {approver && (
-            <Flex textAlign="right" fontSize="sm">
-              can be approved by{"  "}
-              <Text maxW={200} isTruncated ml={2}>
-                {approver}
-              </Text>
+              {approver && (
+                <Text align="right">
+                  can be approved by{"  "}
+                  <Text maxW={200} isTruncated ml={2}>
+                    {approver}
+                  </Text>
+                </Text>
+              )}
             </Flex>
           )}
         </Flex>
       </Flex>
+
       <Heading size="md">Submitted Reviews</Heading>
       <SubmittedReviews antid={antid as string} approver={approver} />
       <Flex my={4} w="full" direction="column">
