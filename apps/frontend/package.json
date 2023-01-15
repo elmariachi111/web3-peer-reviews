@@ -21,6 +21,7 @@
     "chakra-dayzed-datepicker": "^0.2.6",
     "date-fns": "^2.29.3",
     "dayzed": "^3.2.3",
+    "downloadjs": "^1.4.7",
     "eslint": "8.31.0",
     "eslint-config-next": "13.1.1",
     "ethers": "^5.7.2",
@@ -37,6 +38,7 @@
     "web3.storage": "^4.4.0"
   },
   "devDependencies": {
+    "@types/downloadjs": "^1.4.3",
     "@types/react-datepicker": "^4.8.0",
     "eslint-config-app": "*",
     "ts-config-app": "*"

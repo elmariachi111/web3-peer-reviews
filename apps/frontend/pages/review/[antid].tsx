@@ -2,21 +2,32 @@ import { Box, Button, Code, Flex, Heading, Text } from "@chakra-ui/react"
 import { ethers } from "ethers"
 import { useRouter } from "next/router"
 import { useCallback, useState } from "react"
+import { useAccount } from "wagmi"
 import { CommitmentForm } from "../../components/commitment/CommitmentForm"
 import { SubmittedReviews } from "../../components/review/SubmittedReviews"
 import { useApprover } from "../../hooks/useApprover"
 import { useTokenContract } from "../../hooks/useTokenContract"
 import { SignedCommitment } from "../../types"
+import download from "downloadjs"
 
 export default function Review() {
   const { query } = useRouter()
   const { antid } = query
   const { contract: antContract } = useTokenContract()
+  const { address } = useAccount()
 
   const [signedCommitment, setSignedCommitment] = useState<SignedCommitment>()
-  const [commitmentDisclosure, setCommitmentDisclosure] = useState<any>({})
+  const [commitmentDisclosure, setCommitmentDisclosure] = useState<any>()
 
   const { approver } = useApprover(antid as string)
+
+  const downloadCommitment = useCallback(() => {
+    download(
+      JSON.stringify(commitmentDisclosure, null, 2),
+      `commitment-${antid}`,
+      "application/json"
+    )
+  }, [antid, commitmentDisclosure])
 
   const anchorCommitment = useCallback(async () => {
     if (!signedCommitment || !antContract) return
@@ -58,21 +69,37 @@ export default function Review() {
         <CommitmentForm onSubmit={setSignedCommitment} />
         {signedCommitment && (
           <Flex direction="column">
-            <Flex direction="row" w="full" gap={2} my={4}>
-              <Button onClick={() => anchorCommitment()} colorScheme="pink">
-                Publish empty review on chain
-              </Button>
-              <Button colorScheme="purple">
-                Disclose commitment to approver
-              </Button>
-            </Flex>
-            <Text>
-              Disclose this to the request&apos;s approver if you trust them:
-            </Text>
+            <Button
+              onClick={() => anchorCommitment()}
+              colorScheme="pink"
+              my={6}
+              disabled={
+                address?.toLowerCase() !=
+                signedCommitment.anonAddress.toLowerCase()
+              }
+            >
+              {address?.toLowerCase() !=
+              signedCommitment.anonAddress.toLowerCase()
+                ? "switch to anon account to submit"
+                : "Submit peer review"}
+            </Button>
+
             {commitmentDisclosure && (
-              <Code p={2}>
-                <pre>{JSON.stringify(commitmentDisclosure, null, 2)}</pre>
-              </Code>
+              <Flex direction="column">
+                <Text>
+                  Disclose this to the request&apos;s approver if you trust
+                  them:
+                </Text>
+                <Code p={2} minH={48}>
+                  <pre>{JSON.stringify(commitmentDisclosure, null, 2)}</pre>
+                </Code>
+                <Button
+                  colorScheme="purple"
+                  onClick={() => downloadCommitment()}
+                >
+                  Download secret commitment
+                </Button>
+              </Flex>
             )}
           </Flex>
         )}

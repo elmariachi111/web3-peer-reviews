@@ -1,4 +1,4 @@
-import { Button, Link, Table, Td, Th, Tr } from "@chakra-ui/react"
+import { Button, Link, Table, Td, Text, Th, Tr } from "@chakra-ui/react"
 import { useEffect, useState } from "react"
 import { useAccount } from "wagmi"
 import { useTokenContract } from "../../hooks/useTokenContract"
@@ -26,7 +26,7 @@ export const SubmittedReviews = (props: {
       )
       setSubmittedReviews(filteredReviews)
 
-      console.log(allSubmittedReviews, filteredReviews)
+      //console.log(allSubmittedReviews, filteredReviews)
     })()
   }, [chainConfig, props.antid, reviewContract])
 
@@ -44,7 +44,9 @@ export const SubmittedReviews = (props: {
           <Td>{submission.args.peer_reviewer}</Td>
           <Td>
             <Link href={submission.args.reviewHash} isExternal>
-              {submission.args.reviewHash}
+              <Text maxW={300} isTruncated>
+                {submission.args.reviewHash}
+              </Text>
             </Link>
           </Td>
           <Td>

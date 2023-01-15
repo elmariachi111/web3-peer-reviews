@@ -13,6 +13,7 @@ import {
 import { ethers } from "ethers"
 import { useEffect, useMemo, useState } from "react"
 import { useAccount, useSignMessage } from "wagmi"
+import { useOrcidMap } from "../../hooks/useOrcidMap"
 import { SignedCommitment } from "../../types"
 
 const SignControl = (props: {
@@ -61,6 +62,7 @@ export const CommitmentForm = (props: {
   const [privateAddress, setPrivateAddress] = useState<string | undefined>(
     address
   )
+
   const [signedPrivateAddress, setSignedPrivateAddress] = useState<string>()
 
   const [anonAddress, setAnonAddress] = useState<string>()
@@ -68,10 +70,14 @@ export const CommitmentForm = (props: {
 
   const [reviewUrl, setReviewUrl] = useState<string>("")
 
+  const { orcid: privateAddressOrcid } = useOrcidMap(privateAddress)
+
   const canBeSubmitted = useMemo(() => {
     if (!privateAddress || !anonAddress) return false
     if (privateAddress.length < 40 || anonAddress.length < 40) return false
     if (!signedPrivateAddress || !signedAnonAddress) return false
+
+    if (!privateAddressOrcid) return false
 
     const privateAddressSigner = ethers.utils.verifyMessage(
       privateAddress,
@@ -90,6 +96,7 @@ export const CommitmentForm = (props: {
     return true
   }, [
     privateAddress,
+    privateAddressOrcid,
     anonAddress,
     signedPrivateAddress,
     signedAnonAddress,
@@ -102,7 +109,13 @@ export const CommitmentForm = (props: {
         <FormControl>
           <FormLabel>Private Address</FormLabel>
           <FormHelperText>
-            must be associated with an Orcid, not going to be disclosed
+            {privateAddressOrcid ? (
+              <Text color="green.400">{privateAddressOrcid}</Text>
+            ) : (
+              <Text>
+                must be associated with an Orcid, not going to be disclosed
+              </Text>
+            )}
           </FormHelperText>
           <Input
             type="text"
@@ -164,7 +177,7 @@ export const CommitmentForm = (props: {
           })
         }
       >
-        Submit
+        Create Commitment
       </Button>
     </Flex>
   )
