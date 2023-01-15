@@ -56,7 +56,7 @@ export const ReviewForm = (props: { onSubmit: (data: any) => void }) => {
 
   return (
     <>
-      <Heading>File a paper for review</Heading>
+      <Heading mb={4}>File a paper to be reviewed</Heading>
       <Flex
         as="form"
         onSubmit={handleSubmit(onSubmit)}

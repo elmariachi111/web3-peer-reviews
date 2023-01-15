@@ -62,18 +62,5 @@ export default function Issue() {
     [reviewContract, toast]
   )
 
-  return (
-    <Flex direction="column">
-      {hasIssuerRole ? (
-        <Text>You can issue review requests</Text>
-      ) : mappedOrcid ? (
-        <Button onClick={() => grantIssuerRole()}>Claim issuer role</Button>
-      ) : (
-        <Link href="https://orcidauth.vercel.app" isExternal>
-          Map your orcid to your address first
-        </Link>
-      )}
-      <ReviewForm onSubmit={submitReviewRequest} />
-    </Flex>
-  )
+  return <ReviewForm onSubmit={submitReviewRequest} />
 }
